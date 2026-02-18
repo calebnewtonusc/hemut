@@ -1,3 +1,6 @@
+"use client";
+
+import { useState, useCallback } from "react";
 import {
   Package,
   Users,
@@ -12,6 +15,10 @@ import {
   Truck,
   MapPin,
 } from "lucide-react";
+import { useInterval } from "@/hooks/useInterval";
+import { DispatchLoadModal } from "@/components/modals/DispatchLoadModal";
+import { AssignDriverModal } from "@/components/modals/AssignDriverModal";
+import { AlertActionModal } from "@/components/modals/AlertActionModal";
 
 // ─── Types ──────────────────────────────────────────────────
 type LoadStatus = "In Transit" | "Delayed" | "Picked Up" | "Delivered" | "Unassigned" | "HOS Alert";
@@ -42,6 +49,7 @@ const BG_CITIES = [
   { name: "Miami", x: 607, y: 213 },
 ];
 
+// Static route definitions — tx/ty are computed dynamically from routeProgress
 const MAP_ROUTES = [
   {
     id: "L-8821", label: "D-041",
@@ -174,6 +182,63 @@ function hosBar(p: number) {
 
 // ─── Page ───────────────────────────────────────────────────
 export default function DashboardPage() {
+  // Live progress state — keyed by load ID
+  const [routeProgress, setRouteProgress] = useState<Record<string, number>>({
+    "L-8821": 72,
+    "L-8820": 45, // delayed — won't increment
+    "L-8819": 88,
+    "L-8818": 15,
+    "L-8817": 100, // delivered
+    "L-8816": 0,   // unassigned
+    "L-8815": 65,  // HOS alert — won't increment
+  });
+
+  const [lastUpdated, setLastUpdated] = useState(0);
+
+  // Modal state
+  const [dispatchOpen, setDispatchOpen] = useState(false);
+  const [assignOpen, setAssignOpen] = useState(false);
+  const [assignLoadId, setAssignLoadId] = useState<string | undefined>(undefined);
+  const [alertOpen, setAlertOpen] = useState(false);
+  const [activeAlert, setActiveAlert] = useState<typeof alerts[number] | undefined>(undefined);
+
+  // Statuses that should NOT increment
+  const frozenStatuses: LoadStatus[] = ["Delivered", "Unassigned", "Delayed", "HOS Alert"];
+
+  // Every 9 seconds: advance active loads by 0.5–1.5%, reset "last updated" counter
+  const tickProgress = useCallback(() => {
+    setRouteProgress((prev) => {
+      const next = { ...prev };
+      for (const load of loads) {
+        if (frozenStatuses.includes(load.status)) continue;
+        const increment = 0.5 + Math.random(); // 0.5–1.5
+        next[load.id] = Math.min((next[load.id] ?? 0) + increment, 100);
+      }
+      return next;
+    });
+    setLastUpdated(0);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useInterval(tickProgress, 9000);
+
+  // Every 1 second: increment the "last updated" display counter
+  const tickClock = useCallback(() => {
+    setLastUpdated((s) => s + 1);
+  }, []);
+
+  useInterval(tickClock, 1000);
+
+  // Derive live map routes from current progress state
+  const liveMapRoutes = MAP_ROUTES.map((r) => {
+    const p = routeProgress[r.id] ?? 0;
+    return {
+      ...r,
+      tx: Math.round(r.x1 + (r.x2 - r.x1) * (p / 100)),
+      ty: Math.round(r.y1 + (r.y2 - r.y1) * (p / 100)),
+      progress: p,
+    };
+  });
+
   return (
     <div className="p-6 space-y-5">
 
@@ -192,7 +257,10 @@ export default function DashboardPage() {
             <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
             All Systems Live
           </div>
-          <button className="flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors shadow-sm shadow-amber-500/20">
+          <button
+            onClick={() => setDispatchOpen(true)}
+            className="flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors shadow-sm shadow-amber-500/20"
+          >
             <Package className="w-4 h-4" />
             Dispatch Load
           </button>
@@ -240,7 +308,9 @@ export default function DashboardPage() {
           <div className="flex items-center gap-2">
             <MapPin className="w-4 h-4 text-gray-400" />
             <span className="font-semibold text-gray-900 text-sm">Live Fleet Map</span>
-            <span className="text-[10px] bg-emerald-50 text-emerald-600 border border-emerald-200 px-1.5 py-0.5 rounded-full font-bold ml-1">LIVE</span>
+            <span className="text-[10px] bg-emerald-50 text-emerald-600 border border-emerald-200 px-1.5 py-0.5 rounded-full font-bold ml-1">
+              {lastUpdated === 0 ? "JUST NOW" : `${lastUpdated}s ago`}
+            </span>
           </div>
           <div className="flex items-center gap-4 text-[11px] font-medium text-gray-400">
             {[
@@ -269,7 +339,7 @@ export default function DashboardPage() {
             <rect width="800" height="240" fill="url(#dots)" />
 
             {/* Route lines — full dashed gray first */}
-            {MAP_ROUTES.map((r) => (
+            {liveMapRoutes.map((r) => (
               <line
                 key={`bg-${r.id}`}
                 x1={r.x1} y1={r.y1} x2={r.x2} y2={r.y2}
@@ -278,7 +348,7 @@ export default function DashboardPage() {
             ))}
 
             {/* Completed portions */}
-            {MAP_ROUTES.filter((r) => r.status !== "unassigned").map((r) => {
+            {liveMapRoutes.filter((r) => r.status !== "unassigned").map((r) => {
               const c = ROUTE_COLORS[r.status];
               return (
                 <line
@@ -290,7 +360,7 @@ export default function DashboardPage() {
             })}
 
             {/* Origin/destination city dots */}
-            {MAP_ROUTES.map((r) => {
+            {liveMapRoutes.map((r) => {
               const c = ROUTE_COLORS[r.status];
               return (
                 <g key={`cities-${r.id}`}>
@@ -302,7 +372,7 @@ export default function DashboardPage() {
 
             {/* Background city dots for geographic context */}
             {BG_CITIES.map((c) => {
-              const isRouteCity = MAP_ROUTES.some(
+              const isRouteCity = liveMapRoutes.some(
                 (r) => r.origin === c.name || r.dest === c.name || c.name === "Chicago"
               );
               if (isRouteCity) return null;
@@ -325,8 +395,8 @@ export default function DashboardPage() {
             <text x="190" y="147" fontSize="7.5" fill="#64748b" fontFamily="system-ui, sans-serif">Phoenix</text>
             <text x="410" y="176" fontSize="7.5" fill="#64748b" fontFamily="system-ui, sans-serif">Houston</text>
 
-            {/* Truck position markers */}
-            {MAP_ROUTES.filter((r) => r.label).map((r) => {
+            {/* Truck position markers — positions update from liveMapRoutes */}
+            {liveMapRoutes.filter((r) => r.label).map((r) => {
               const c = ROUTE_COLORS[r.status];
               return (
                 <g key={`truck-${r.id}`}>
@@ -390,10 +460,12 @@ export default function DashboardPage() {
           <div className="divide-y divide-gray-50">
             {loads.map((load) => {
               const s = loadStatusStyle[load.status];
+              const isAssignable = load.ai === "Assign Garcia" || load.status === "Unassigned";
               return (
                 <div
                   key={load.id}
-                  className={`grid grid-cols-[80px_1fr_90px_90px_65px_90px] gap-2 items-center px-5 py-3 hover:bg-gray-50/70 transition-colors ${load.urgent ? "bg-red-50/30" : ""}`}
+                  className={`grid grid-cols-[80px_1fr_90px_90px_65px_90px] gap-2 items-center px-5 py-3 hover:bg-gray-50/70 transition-colors ${load.urgent ? "bg-red-50/30" : ""} ${isAssignable ? "cursor-pointer" : ""}`}
+                  onClick={isAssignable ? () => { setAssignLoadId(load.id); setAssignOpen(true); } : undefined}
                 >
                   {/* Load ID */}
                   <div className="flex items-center gap-1.5">
@@ -411,7 +483,7 @@ export default function DashboardPage() {
                     <div className="h-1 bg-gray-100 rounded-full overflow-hidden">
                       <div
                         className={`h-full rounded-full transition-all ${load.status === "Delayed" || load.status === "HOS Alert" ? "bg-red-400" : load.status === "Delivered" ? "bg-emerald-500" : load.status === "Picked Up" ? "bg-amber-400" : "bg-blue-500"}`}
-                        style={{ width: `${load.progress}%` }}
+                        style={{ width: `${routeProgress[load.id] ?? load.progress}%` }}
                       />
                     </div>
                     <div className="flex items-center gap-1 mt-1">
@@ -471,7 +543,10 @@ export default function DashboardPage() {
                     </div>
                     <p className="text-[11px] font-semibold text-gray-800 mb-1">{a.title}</p>
                     <p className="text-[10px] text-gray-500 leading-relaxed mb-2">{a.msg}</p>
-                    <button className={`text-[10px] font-bold px-2 py-1 rounded-md bg-white border ${st.btn} transition-colors`}>
+                    <button
+                      className={`text-[10px] font-bold px-2 py-1 rounded-md bg-white border ${st.btn} transition-colors`}
+                      onClick={() => { setActiveAlert(a); setAlertOpen(true); }}
+                    >
                       {a.action} →
                     </button>
                   </div>
@@ -557,6 +632,11 @@ export default function DashboardPage() {
           ))}
         </div>
       </div>
+
+      {/* Modals */}
+      <DispatchLoadModal open={dispatchOpen} onClose={() => setDispatchOpen(false)} />
+      <AssignDriverModal open={assignOpen} onClose={() => setAssignOpen(false)} loadId={assignLoadId} />
+      <AlertActionModal open={alertOpen} onClose={() => setAlertOpen(false)} alert={activeAlert} />
     </div>
   );
 }

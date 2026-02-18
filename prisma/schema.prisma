@@ -1,0 +1,96 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String
+  password  String?
+  role      String   @default("DISPATCHER")
+  companyId String   @default("demo-company")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("users")
+}
+
+model Company {
+  id        String   @id @default(cuid())
+  name      String
+  dot       String   @unique
+  mc        String   @unique
+  createdAt DateTime @default(now())
+
+  @@map("companies")
+}
+
+model Driver {
+  id           String   @id @default(cuid())
+  driverId     String   @unique
+  name         String
+  initials     String
+  phone        String?
+  cdlClass     String   @default("Class A")
+  status       String   @default("AVAILABLE")
+  hosRemaining Int      @default(660)
+  hosUsed      Int      @default(0)
+  hosLabel     String   @default("11h avail.")
+  location     String?
+  lat          Float?
+  lon          Float?
+  csaScore     Int      @default(15)
+  yearsExp     Int      @default(5)
+  violations   Int      @default(0)
+  homeDomicile String?
+  nextReset    String?
+  companyId    String   @default("demo-company")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  loads Load[]
+
+  @@map("drivers")
+}
+
+model Load {
+  id        String   @id @default(cuid())
+  loadId    String   @unique
+  origin    String
+  dest      String
+  status    String   @default("UNASSIGNED")
+  progress  Int      @default(0)
+  eta       String?
+  rpm       Float?
+  miles     Int      @default(0)
+  weight    String?
+  commodity String?
+  customer  String?
+  urgent    Boolean  @default(false)
+  driverId  String?
+  companyId String   @default("demo-company")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  driver Driver? @relation(fields: [driverId], references: [id])
+
+  @@map("loads")
+}
+
+model Alert {
+  id         String    @id @default(cuid())
+  severity   String    @default("MEDIUM")
+  title      String
+  message    String
+  action     String?
+  resolved   Boolean   @default(false)
+  companyId  String    @default("demo-company")
+  createdAt  DateTime  @default(now())
+  resolvedAt DateTime?
+
+  @@map("alerts")
+}

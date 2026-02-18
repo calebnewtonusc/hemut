@@ -17,8 +17,10 @@ import {
   Settings,
   ChevronRight,
   TrendingUp,
+  LogOut,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useSession, signOut } from "next-auth/react";
 
 interface NavItem {
   href: string;
@@ -78,6 +80,7 @@ const badgeStyles: Record<string, string> = {
 
 export function Sidebar() {
   const pathname = usePathname();
+  const { data: session } = useSession();
 
   return (
     <aside className="w-[220px] flex flex-col h-screen bg-[#080d1a] text-white shrink-0 border-r border-white/[0.06]">
@@ -169,13 +172,21 @@ export function Sidebar() {
       <div className="px-3 py-3.5 border-t border-white/[0.06]">
         <div className="flex items-center gap-2.5">
           <div className="w-7 h-7 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center shrink-0 shadow-sm">
-            <span className="text-white text-[10px] font-bold">RM</span>
+            <span className="text-white text-[10px] font-bold">
+              {session?.user?.name?.split(" ").map(n => n[0]).join("").slice(0, 2) ?? "RM"}
+            </span>
           </div>
           <div className="flex-1 min-w-0">
-            <div className="text-[12px] font-semibold text-white/90 truncate">Ricky Maldonado</div>
-            <div className="text-[10px] text-white/30 truncate">Ops Manager</div>
+            <div className="text-[12px] font-semibold text-white/90 truncate">{session?.user?.name ?? "Ricky Maldonado"}</div>
+            <div className="text-[10px] text-white/30 truncate">{(session?.user as { role?: string })?.role ?? "Ops Manager"}</div>
           </div>
-          <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />
+          <button
+            onClick={() => signOut({ callbackUrl: "/login" })}
+            className="text-white/20 hover:text-white/60 transition-colors"
+            title="Sign out"
+          >
+            <LogOut className="w-3.5 h-3.5" />
+          </button>
         </div>
       </div>
     </aside>
