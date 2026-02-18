@@ -5,226 +5,285 @@ import {
   Bell,
   AlertTriangle,
   CheckCircle2,
+  Clock,
   Users,
   Truck,
-  DollarSign,
-  Wrench,
+  Radio,
+  ChevronRight,
   Plus,
-  Clock,
-  ArrowRight,
-  Activity,
   Shield,
+  FileText,
   Zap,
-  Globe,
-  Star,
-  TrendingUp,
+  ArrowRight,
 } from "lucide-react";
 
-type Channel = "dispatch" | "driver" | "finance" | "maintenance" | "leadership" | "all";
-type Priority = "critical" | "high" | "normal" | "low";
+type Channel = "dispatch" | "driver" | "compliance" | "customer" | "team";
 
 interface Message {
   id: string;
-  from: string;
-  fromDept: string;
   channel: Channel;
+  from: string;
+  initials: string;
   subject: string;
   preview: string;
   time: string;
-  priority: Priority;
-  read: boolean;
-  thread: number;
+  unread: boolean;
+  priority?: "critical" | "high" | "normal";
+  load?: string;
+}
+
+interface Protocol {
+  title: string;
+  icon: React.ElementType;
+  color: string;
+  bg: string;
+  border: string;
+  sla: string;
+  channel: string;
+  rules: string[];
 }
 
 const channelConfig: Record<Channel, { label: string; icon: React.ElementType; color: string; bg: string }> = {
-  dispatch: { label: "Dispatch", icon: Truck, color: "text-blue-700", bg: "bg-blue-100" },
-  driver: { label: "Driver Ops", icon: Users, color: "text-amber-700", bg: "bg-amber-100" },
-  finance: { label: "Finance", icon: DollarSign, color: "text-emerald-700", bg: "bg-emerald-100" },
-  maintenance: { label: "Maintenance", icon: Wrench, color: "text-orange-700", bg: "bg-orange-100" },
-  leadership: { label: "Leadership", icon: Star, color: "text-purple-700", bg: "bg-purple-100" },
-  all: { label: "All Teams", icon: Globe, color: "text-gray-700", bg: "bg-gray-100" },
-};
-
-const priorityConfig: Record<Priority, { label: string; color: string; dot: string }> = {
-  critical: { label: "Critical", color: "text-red-600", dot: "bg-red-500" },
-  high: { label: "High", color: "text-orange-600", dot: "bg-orange-400" },
-  normal: { label: "Normal", color: "text-blue-600", dot: "bg-blue-400" },
-  low: { label: "Low", color: "text-gray-500", dot: "bg-gray-300" },
+  dispatch: { label: "Dispatch Alerts", icon: Radio, color: "text-blue-700", bg: "bg-blue-100" },
+  driver: { label: "Driver Check-ins", icon: Truck, color: "text-amber-700", bg: "bg-amber-100" },
+  compliance: { label: "Compliance & Safety", icon: Shield, color: "text-red-700", bg: "bg-red-100" },
+  customer: { label: "Customer Updates", icon: FileText, color: "text-purple-700", bg: "bg-purple-100" },
+  team: { label: "Team Announcements", icon: Users, color: "text-emerald-700", bg: "bg-emerald-100" },
 };
 
 const messages: Message[] = [
   {
     id: "1",
-    from: "Marcus Johnson",
-    fromDept: "Dispatch",
-    channel: "dispatch",
-    subject: "Load #8821 - Urgent: Driver needs alternate route",
-    preview: "I-10 eastbound blocked near Banning. Need Marcus to reroute via SR-60. ETA pushed by 45min.",
-    time: "3m ago",
+    channel: "compliance",
+    from: "FMCSA Alert System",
+    initials: "FA",
+    subject: "⚠ HOS Violation — Driver D-047 (T. Patel)",
+    preview: "Driver T. Patel logged 11h 58min driving time on Feb 17 — exceeds 11-hour limit by 58 minutes. Review and document corrective action.",
+    time: "8m ago",
+    unread: true,
     priority: "critical",
-    read: false,
-    thread: 3,
+    load: "L-8815",
   },
   {
     id: "2",
-    from: "Amy Torres",
-    fromDept: "Finance",
-    channel: "finance",
-    subject: "Invoice Aging Alert: 7 accounts over 30 days",
-    preview: "Following up on overdue invoices. Requesting approval to escalate Swift Logistics and Sun Valley Freight.",
-    time: "18m ago",
+    channel: "dispatch",
+    from: "Load Board System",
+    initials: "LB",
+    subject: "Load L-8816 — Driver needed by 3:00 PM today",
+    preview: "Seattle → Portland · 174 mi · $3.20/mi. Available drivers: M. Garcia (reset), L. Brown (reset). Auto-match recommended: M. Garcia.",
+    time: "22m ago",
+    unread: true,
     priority: "high",
-    read: false,
-    thread: 1,
+    load: "L-8816",
   },
   {
     id: "3",
-    from: "Robert Kim",
-    fromDept: "Maintenance",
-    channel: "maintenance",
-    subject: "Truck #T-031 scheduled for brake inspection",
-    preview: "T-031 due for brake inspection Feb 19. Please hold from dispatch assignment until cleared.",
-    time: "1h ago",
+    channel: "customer",
+    from: "Walmart DC-Atlanta",
+    initials: "WM",
+    subject: "Delivery window exception — Load L-8820",
+    preview: "Our dock will close at 9:00 PM EST. Current ETA is 8:45 PM — only 15-minute buffer. Please confirm or request appointment reschedule.",
+    time: "35m ago",
+    unread: true,
     priority: "high",
-    read: true,
-    thread: 2,
+    load: "L-8820",
   },
   {
     id: "4",
-    from: "Sara Williams",
-    fromDept: "Leadership",
-    channel: "all",
-    subject: "Q1 OKR Review — All Hands Prep",
-    preview: "Our all-hands is Feb 28. Please submit your team's Q1 progress bullets by Feb 25.",
-    time: "3h ago",
-    priority: "normal",
-    read: true,
-    thread: 0,
+    channel: "driver",
+    from: "K. Johnson (D-028)",
+    initials: "KJ",
+    subject: "Check-in: Load L-8819 — Approaching Phoenix",
+    preview: "Currently at milepost 142 on I-10 E. ETA to Phoenix dock 5:00 PM. No issues. Pre-trip complete. Will need fuel stop at exit 117.",
+    time: "1h ago",
+    unread: false,
+    load: "L-8819",
   },
   {
     id: "5",
-    from: "Driver Portal",
-    fromDept: "Driver Ops",
+    channel: "dispatch",
+    from: "Ops System",
+    initials: "OS",
+    subject: "Truck T-031 flagged for maintenance",
+    preview: "15,246 miles since last preventive maintenance. DOT inspection due in 12 days. Schedule service to avoid out-of-service citation.",
+    time: "1h ago",
+    unread: false,
+    priority: "normal",
+  },
+  {
+    id: "6",
+    channel: "team",
+    from: "Ricky Maldonado",
+    initials: "RM",
+    subject: "Weekly ops brief — Feb 18 | Fleet at 84% utilization",
+    preview: "Team — strong week. 247 active loads, 96.3% on-time. Two items need attention before EOD: L-8816 unassigned, T. Patel HOS issue needs documentation.",
+    time: "2h ago",
+    unread: false,
+  },
+  {
+    id: "7",
     channel: "driver",
-    subject: "Safety incident report filed — Load #8790",
-    preview: "Minor incident reported near Tucson. No injuries. Driver Chen submitted full report. Review required.",
+    from: "J. Martinez (D-041)",
+    initials: "JM",
+    subject: "Check-in: Load L-8821 — Tulsa, OK",
+    preview: "Passed Tulsa OK. 72% complete. ETA Dallas Feb 19 2:30 PM confirmed. Weather clear through Texas. HOS at 6h 22m remaining.",
+    time: "3h ago",
+    unread: false,
+    load: "L-8821",
+  },
+  {
+    id: "8",
+    channel: "compliance",
+    from: "Safety Department",
+    initials: "SD",
+    subject: "Random drug test — D. Thompson (D-055) selected",
+    preview: "D. Thompson has been randomly selected per DOT 49 CFR Part 40 protocol. Testing must be completed within 2 hours of notification.",
     time: "4h ago",
+    unread: false,
     priority: "high",
-    read: true,
-    thread: 4,
+  },
+];
+
+const protocols: Protocol[] = [
+  {
+    title: "Dispatch Alerts",
+    icon: Radio,
+    color: "text-blue-700",
+    bg: "bg-blue-50",
+    border: "border-blue-200",
+    sla: "Acknowledge within 5 min",
+    channel: "Hemut Dispatch Board + SMS",
+    rules: [
+      "All load assignments confirmed via Hemut TMS — never verbal only",
+      "Unassigned loads >1 hour trigger escalation to ops manager",
+      "Route changes require driver acknowledgment in app before proceeding",
+      "Delays >30 min must be logged with cause code in TMS",
+    ],
+  },
+  {
+    title: "Driver Check-ins",
+    icon: Truck,
+    color: "text-amber-700",
+    bg: "bg-amber-50",
+    border: "border-amber-200",
+    sla: "Required every 4 hours on-route",
+    channel: "Hemut Driver App + ELD",
+    rules: [
+      "Mandatory check-in at pickup, every 4h en route, and at delivery",
+      "HOS clock visible to dispatch in real time via ELD integration",
+      "Driver unreachable for 60+ min triggers ops manager alert",
+      "All fuel stops, breakdowns, and delays logged in app within 15 min",
+    ],
+  },
+  {
+    title: "Compliance & Safety",
+    icon: Shield,
+    color: "text-red-700",
+    bg: "bg-red-50",
+    border: "border-red-200",
+    sla: "Critical items: immediate action",
+    channel: "Compliance Dashboard + Email",
+    rules: [
+      "HOS violations trigger immediate ops + safety manager notification",
+      "Random drug test notifications require response within 2 hours",
+      "Post-accident procedures: notify ops within 30 min, DOT within 24h",
+      "All corrective actions documented within 48 hours of incident",
+    ],
+  },
+  {
+    title: "Customer Updates",
+    icon: FileText,
+    color: "text-purple-700",
+    bg: "bg-purple-50",
+    border: "border-purple-200",
+    sla: "Proactive update before customer asks",
+    channel: "Email + Customer Portal",
+    rules: [
+      "Delivery confirmations sent within 1 hour of POD capture",
+      "Exceptions (delays, damage) communicated before customer follow-up",
+      "Detention: notify shipper at hour 1, escalate at hour 2",
+      "Appointment reschedules require 4-hour advance notice minimum",
+    ],
   },
 ];
 
 const siloRisks = [
   {
-    dept: "Finance ↔ Dispatch",
-    issue: "Invoice disputes taking 4.2 days to resolve due to info gaps",
-    recommendation: "Add Dispatch to weekly Finance Brief distribution",
-    severity: "medium",
+    title: "Driver ↔ Dispatch lag",
+    severity: "High",
+    desc: "Avg. check-in response time is 18 minutes. Industry standard is <5 minutes. 3 loads this month had delays tied to communication gaps.",
+    fix: "Enable push notifications for all active drivers via Hemut app — estimated 4-minute avg. response after rollout.",
+    icon: Truck,
   },
   {
-    dept: "Maintenance ↔ Dispatch",
-    issue: "3 trucks assigned while in service last month — lost 2 loads",
-    recommendation: "Create shared maintenance hold calendar with auto-dispatch block",
-    severity: "high",
+    title: "Finance sees exceptions late",
+    severity: "Medium",
+    desc: "Invoice disputes are raised avg. 9 days after delivery. Finance team not looped in on detention or damage exceptions at point of occurrence.",
+    fix: "Route compliance alerts to Finance CC list automatically. Create exception dashboard for Finance to monitor in real time.",
+    icon: FileText,
   },
   {
-    dept: "Driver Ops ↔ Leadership",
-    issue: "Driver feedback rarely reaches leadership — turnover correlation detected",
-    recommendation: "Monthly driver pulse survey with exec summary auto-generated",
-    severity: "medium",
-  },
-];
-
-const communicationProtocols = [
-  {
-    type: "Critical Ops Alert",
-    icon: AlertTriangle,
-    triggers: ["Load unassigned >2 hours", "Truck breakdown on route", "Safety incident"],
-    channel: "Hemut Chat + SMS + Email",
-    sla: "Response within 15 minutes",
-    color: "red",
-  },
-  {
-    type: "Daily Standup",
-    icon: Activity,
-    triggers: ["Every weekday 8:00 AM", "Dispatch, Ops, Maintenance"],
-    channel: "Video + Hemut Chat Summary",
-    sla: "15-minute async recap by 8:30 AM",
-    color: "blue",
-  },
-  {
-    type: "Cross-Dept Update",
-    icon: MessageSquare,
-    triggers: ["Finance invoices >$50K", "Fleet utilization <70%", "New carrier added"],
-    channel: "Email + Hemut Notification",
-    sla: "Response within 4 hours",
-    color: "amber",
-  },
-  {
-    type: "Leadership Escalation",
+    title: "Compliance updates siloed to safety team",
+    severity: "Medium",
+    desc: "HOS violations and drug test results reach ops managers 2–4 hours after incident. FMCSA violations require faster loop-in.",
+    fix: "Compliance dashboard integrated into main ops view. All P1 compliance events auto-notify ops manager via SMS within 5 minutes.",
     icon: Shield,
-    triggers: ["Compliance violation", "Driver safety concern", "Revenue miss >10%"],
-    channel: "Direct message + Priority inbox",
-    sla: "Response within 1 hour",
-    color: "purple",
   },
 ];
 
-const colorProto: Record<string, { bg: string; border: string; icon: string; badge: string }> = {
-  red: { bg: "bg-red-50", border: "border-red-200", icon: "text-red-600", badge: "bg-red-100 text-red-700" },
-  blue: { bg: "bg-blue-50", border: "border-blue-200", icon: "text-blue-600", badge: "bg-blue-100 text-blue-700" },
-  amber: { bg: "bg-amber-50", border: "border-amber-200", icon: "text-amber-600", badge: "bg-amber-100 text-amber-700" },
-  purple: { bg: "bg-purple-50", border: "border-purple-200", icon: "text-purple-600", badge: "bg-purple-100 text-purple-700" },
-};
+const healthScores = [
+  { label: "Dispatch ↔ Driver Response Time", score: 62, target: 90 },
+  { label: "Customer Notification SLA", score: 84, target: 95 },
+  { label: "Compliance Loop-In Speed", score: 55, target: 85 },
+  { label: "Cross-Team Visibility Index", score: 71, target: 90 },
+];
 
 export default function CommunicationsPage() {
   const [activeTab, setActiveTab] = useState<"inbox" | "protocols" | "silos">("inbox");
-  const [filterChannel, setFilterChannel] = useState<Channel | "all">("all");
+  const [activeChannel, setActiveChannel] = useState<Channel | "all">("all");
 
-  const filtered = messages.filter(
-    (m) => filterChannel === "all" || m.channel === filterChannel
-  );
-
-  const unreadCount = messages.filter((m) => !m.read).length;
+  const filtered = activeChannel === "all" ? messages : messages.filter((m) => m.channel === activeChannel);
+  const unreadCount = messages.filter((m) => m.unread).length;
 
   return (
-    <div className="p-8">
+    <div className="p-6">
       {/* Header */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Communications Hub</h1>
-          <p className="text-gray-500 mt-0.5">Unified visibility across all Hemut teams — zero silos</p>
+          <h1 className="text-xl font-bold text-gray-900">Communications Hub</h1>
+          <p className="text-sm text-gray-400 mt-0.5">Unified dispatch, driver, compliance, and customer communications</p>
         </div>
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 bg-red-50 text-red-600 px-3 py-1.5 rounded-lg text-sm font-medium border border-red-200">
-            <Bell className="w-4 h-4" />
-            {unreadCount} unread
-          </div>
-          <button className="flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-white px-4 py-2.5 rounded-lg text-sm font-medium transition-colors shadow-sm">
+          {unreadCount > 0 && (
+            <div className="flex items-center gap-1.5 text-xs font-semibold text-red-700 bg-red-50 border border-red-200 px-3 py-1.5 rounded-full">
+              <Bell className="w-3.5 h-3.5" />
+              {unreadCount} unread
+            </div>
+          )}
+          <button className="flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm">
             <Plus className="w-4 h-4" />
-            New Broadcast
+            New Message
           </button>
         </div>
       </div>
 
-      {/* Stats Row */}
-      <div className="grid grid-cols-4 gap-5 mb-8">
+      {/* Stats */}
+      <div className="grid grid-cols-4 gap-4 mb-6">
         {[
-          { label: "Messages Today", value: "47", sub: "Across all channels", icon: MessageSquare, bg: "bg-blue-50", iconColor: "text-blue-600" },
-          { label: "Avg Response Time", value: "12m", sub: "↓ 8min from last week", icon: Clock, bg: "bg-emerald-50", iconColor: "text-emerald-600" },
-          { label: "Critical Alerts", value: "2", sub: "Require immediate action", icon: AlertTriangle, bg: "bg-red-50", iconColor: "text-red-600" },
-          { label: "Silo Risk Score", value: "34", sub: "Low (target: <50)", icon: TrendingUp, bg: "bg-amber-50", iconColor: "text-amber-600" },
+          { label: "Messages Today", value: "38", sub: "3 require action now", icon: MessageSquare, color: "text-blue-600", bg: "bg-blue-50" },
+          { label: "Compliance Alerts", value: "2", sub: "1 critical · 1 pending", icon: AlertTriangle, color: "text-red-600", bg: "bg-red-50" },
+          { label: "Driver Check-ins", value: "41", sub: "All active drivers reported", icon: CheckCircle2, color: "text-emerald-600", bg: "bg-emerald-50" },
+          { label: "Avg. Response Time", value: "18 min", sub: "Target: <5 min", icon: Clock, color: "text-amber-600", bg: "bg-amber-50" },
         ].map((s) => {
           const Icon = s.icon;
           return (
-            <div key={s.label} className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
-              <div className={`w-10 h-10 rounded-lg ${s.bg} flex items-center justify-center mb-3`}>
-                <Icon className={`w-5 h-5 ${s.iconColor}`} />
+            <div key={s.label} className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+              <div className={`w-9 h-9 ${s.bg} rounded-lg flex items-center justify-center mb-3`}>
+                <Icon className={`w-4 h-4 ${s.color}`} />
               </div>
-              <div className="text-2xl font-bold text-gray-900 mb-1">{s.value}</div>
-              <div className="text-sm font-medium text-gray-700">{s.label}</div>
-              <div className="text-xs text-gray-400 mt-0.5">{s.sub}</div>
+              <div className="text-2xl font-bold text-gray-900 mb-0.5">{s.value}</div>
+              <div className="text-xs font-semibold text-gray-700 mb-0.5">{s.label}</div>
+              <div className="text-xs text-gray-400">{s.sub}</div>
             </div>
           );
         })}
@@ -236,78 +295,105 @@ export default function CommunicationsPage() {
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`px-5 py-2 rounded-md text-sm font-medium transition-all ${
+            className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
               activeTab === tab ? "bg-white shadow-sm text-gray-900" : "text-gray-500 hover:text-gray-700"
             }`}
           >
-            {tab === "inbox" ? "Unified Inbox" : tab === "protocols" ? "Protocols" : "Silo Analysis"}
+            {tab === "inbox" ? "Unified Inbox" : tab === "protocols" ? "Communication SOPs" : "Silo Analysis"}
           </button>
         ))}
       </div>
 
       {/* Inbox Tab */}
       {activeTab === "inbox" && (
-        <div className="flex gap-6">
-          <div className="w-52 shrink-0 space-y-1">
-            {(["all", ...Object.keys(channelConfig).filter(c => c !== "all")] as (Channel | "all")[]).map((ch) => {
-              const config = ch === "all"
-                ? { label: "All Channels", icon: Globe, color: "text-gray-700", bg: "bg-gray-100" }
-                : channelConfig[ch as Channel];
-              const Icon = config.icon;
-              const count = ch === "all" ? messages.length : messages.filter(m => m.channel === ch).length;
+        <div className="flex gap-5">
+          {/* Channel Filter */}
+          <div className="w-48 shrink-0 space-y-1">
+            <button
+              onClick={() => setActiveChannel("all")}
+              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
+                activeChannel === "all" ? "bg-gray-900 text-white" : "text-gray-600 hover:bg-gray-100"
+              }`}
+            >
+              <span className="flex items-center gap-2.5">
+                <MessageSquare className="w-4 h-4" />
+                All Channels
+              </span>
+              <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${activeChannel === "all" ? "bg-white/20 text-white" : "bg-gray-200 text-gray-600"}`}>
+                {messages.length}
+              </span>
+            </button>
+            {(Object.entries(channelConfig) as [Channel, typeof channelConfig[Channel]][]).map(([key, cfg]) => {
+              const Icon = cfg.icon;
+              const count = messages.filter((m) => m.channel === key).length;
+              const active = activeChannel === key;
               return (
                 <button
-                  key={ch}
-                  onClick={() => setFilterChannel(ch)}
-                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
-                    filterChannel === ch ? "bg-amber-50 text-amber-700 border border-amber-200" : "text-gray-600 hover:bg-gray-50"
+                  key={key}
+                  onClick={() => setActiveChannel(key)}
+                  className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
+                    active ? "bg-amber-50 text-amber-700 border border-amber-200" : "text-gray-600 hover:bg-gray-100"
                   }`}
                 >
-                  <Icon className="w-4 h-4" />
-                  <span className="flex-1 text-left">{config.label}</span>
-                  <span className="text-xs bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded-full">{count}</span>
+                  <span className="flex items-center gap-2.5">
+                    <Icon className="w-4 h-4" />
+                    <span className="truncate text-xs">{cfg.label}</span>
+                  </span>
+                  <span className="text-[10px] font-bold text-gray-400">{count}</span>
                 </button>
               );
             })}
           </div>
 
+          {/* Messages */}
           <div className="flex-1 space-y-2">
             {filtered.map((msg) => {
               const ch = channelConfig[msg.channel];
-              const ChIcon = ch.icon;
-              const pri = priorityConfig[msg.priority];
+              const ChannelIcon = ch.icon;
               return (
                 <div
                   key={msg.id}
-                  className={`bg-white rounded-xl border p-5 shadow-sm hover:shadow-md transition-all cursor-pointer ${
-                    !msg.read ? "border-l-4 border-l-amber-400 border-gray-200" : "border-gray-200"
+                  className={`bg-white rounded-xl border p-4 hover:shadow-md transition-shadow cursor-pointer ${
+                    msg.priority === "critical" ? "border-red-200 bg-red-50/30" :
+                    msg.priority === "high" ? "border-orange-200 bg-orange-50/20" :
+                    "border-gray-200"
                   }`}
                 >
-                  <div className="flex items-start gap-4">
-                    <div className={`w-9 h-9 rounded-lg ${ch.bg} flex items-center justify-center shrink-0`}>
-                      <ChIcon className={`w-4 h-4 ${ch.color}`} />
+                  <div className="flex items-start gap-3">
+                    <div className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center shrink-0 font-bold text-gray-600 text-xs">
+                      {msg.initials}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-3 mb-1">
-                        <span className={`font-semibold text-sm ${!msg.read ? "text-gray-900" : "text-gray-700"}`}>
-                          {msg.subject}
+                      <div className="flex items-center gap-2 mb-0.5 flex-wrap">
+                        <span className={`flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${ch.bg} ${ch.color}`}>
+                          <ChannelIcon className="w-2.5 h-2.5" />
+                          {ch.label}
                         </span>
-                        <div className={`w-1.5 h-1.5 rounded-full shrink-0 ${pri.dot}`} />
-                        <span className={`text-xs font-medium ${pri.color}`}>{pri.label}</span>
+                        {msg.load && (
+                          <span className="text-[10px] font-mono font-bold text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded">
+                            {msg.load}
+                          </span>
+                        )}
+                        {msg.priority === "critical" && (
+                          <span className="text-[10px] font-bold text-red-600 bg-red-100 px-1.5 py-0.5 rounded-full uppercase">Critical</span>
+                        )}
+                        {msg.priority === "high" && (
+                          <span className="text-[10px] font-bold text-orange-600 bg-orange-100 px-1.5 py-0.5 rounded-full uppercase">High</span>
+                        )}
+                        {msg.unread && (
+                          <div className="w-1.5 h-1.5 rounded-full bg-blue-500 shrink-0" />
+                        )}
                       </div>
-                      <div className="text-xs text-gray-500 mb-1">
-                        {msg.from} · {msg.fromDept}
+                      <div className={`text-sm mb-1 ${msg.unread ? "font-semibold text-gray-900" : "font-medium text-gray-700"}`}>
+                        {msg.subject}
                       </div>
-                      <p className="text-sm text-gray-500 truncate">{msg.preview}</p>
+                      <p className="text-xs text-gray-400 line-clamp-2 leading-relaxed">{msg.preview}</p>
                     </div>
-                    <div className="shrink-0 text-right">
-                      <div className="text-xs text-gray-400">{msg.time}</div>
-                      {msg.thread > 0 && (
-                        <div className="flex items-center justify-end gap-1 mt-1 text-xs text-gray-400">
-                          <MessageSquare className="w-3 h-3" />
-                          {msg.thread}
-                        </div>
-                      )}
+                    <div className="flex flex-col items-end gap-2 shrink-0">
+                      <span className="text-[10px] text-gray-400 whitespace-nowrap">{msg.time}</span>
+                      <button className="text-[10px] text-amber-600 font-semibold hover:text-amber-700 flex items-center gap-0.5">
+                        Reply <ArrowRight className="w-2.5 h-2.5" />
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -320,37 +406,29 @@ export default function CommunicationsPage() {
       {/* Protocols Tab */}
       {activeTab === "protocols" && (
         <div className="grid grid-cols-2 gap-5">
-          {communicationProtocols.map((proto) => {
-            const Icon = proto.icon;
-            const c = colorProto[proto.color];
+          {protocols.map((p) => {
+            const Icon = p.icon;
             return (
-              <div key={proto.type} className={`bg-white rounded-xl border ${c.border} shadow-sm overflow-hidden`}>
-                <div className={`${c.bg} px-6 py-5 border-b ${c.border}`}>
+              <div key={p.title} className={`bg-white rounded-xl border ${p.border} shadow-sm overflow-hidden`}>
+                <div className={`${p.bg} px-5 py-4 border-b ${p.border}`}>
                   <div className="flex items-center gap-3 mb-1">
-                    <Icon className={`w-5 h-5 ${c.icon}`} />
-                    <h3 className="font-bold text-gray-900">{proto.type}</h3>
+                    <Icon className={`w-5 h-5 ${p.color}`} />
+                    <h3 className={`font-bold ${p.color}`}>{p.title}</h3>
                   </div>
-                  <div className={`inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full ${c.badge}`}>
-                    <Clock className="w-3 h-3" />
-                    SLA: {proto.sla}
+                  <div className="flex items-center gap-4 text-xs text-gray-500">
+                    <span>SLA: <span className="font-semibold text-gray-700">{p.sla}</span></span>
                   </div>
+                  <div className="text-xs text-gray-500 mt-1">Channel: <span className="font-semibold text-gray-700">{p.channel}</span></div>
                 </div>
-                <div className="p-6">
-                  <div className="mb-4">
-                    <span className="text-xs uppercase tracking-wide text-gray-400 font-semibold">Triggers</span>
-                    <ul className="mt-2 space-y-1.5">
-                      {proto.triggers.map((t, i) => (
-                        <li key={i} className="flex items-center gap-2 text-sm text-gray-600">
-                          <div className={`w-1.5 h-1.5 rounded-full ${c.icon.replace("text-", "bg-")}`} />
-                          {t}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                  <div>
-                    <span className="text-xs uppercase tracking-wide text-gray-400 font-semibold">Delivery Channel</span>
-                    <p className="text-sm text-gray-700 font-medium mt-1">{proto.channel}</p>
-                  </div>
+                <div className="p-5">
+                  <ul className="space-y-2.5">
+                    {p.rules.map((rule, i) => (
+                      <li key={i} className="flex items-start gap-2.5 text-sm text-gray-600">
+                        <ChevronRight className={`w-3.5 h-3.5 ${p.color} shrink-0 mt-0.5`} />
+                        {rule}
+                      </li>
+                    ))}
+                  </ul>
                 </div>
               </div>
             );
@@ -361,68 +439,69 @@ export default function CommunicationsPage() {
       {/* Silo Analysis Tab */}
       {activeTab === "silos" && (
         <div className="space-y-5">
-          <div className="bg-gradient-to-r from-[#0f1629] to-[#162040] rounded-xl p-6 text-white">
-            <div className="flex items-center gap-2 mb-3">
-              <Zap className="w-5 h-5 text-amber-400" />
-              <span className="font-bold text-lg">AI Silo Detection</span>
-              <span className="ml-2 text-xs bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded-full">3 risks identified</span>
+          <div className="bg-gradient-to-br from-[#0a0f1e] to-[#111827] rounded-xl p-5 text-white border border-white/5">
+            <div className="flex items-center gap-2 mb-4">
+              <Zap className="w-4 h-4 text-amber-400" />
+              <span className="font-semibold text-sm">AI Communication Health Analysis</span>
+              <span className="text-[10px] bg-amber-500/15 text-amber-400 border border-amber-500/20 px-2 py-0.5 rounded-full font-semibold ml-auto">
+                Feb 18 · Live
+              </span>
             </div>
-            <p className="text-white/70 text-sm">
-              {"Hemut's AI analyzes cross-team communication patterns, response times, and task handoffs to detect information silos before they cause operational issues."}
-            </p>
-          </div>
-
-          {siloRisks.map((risk, i) => (
-            <div key={i} className={`bg-white rounded-xl border shadow-sm p-6 ${risk.severity === "high" ? "border-l-4 border-l-red-400 border-gray-200" : "border-l-4 border-l-amber-400 border-gray-200"}`}>
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-2">
-                    <AlertTriangle className={`w-5 h-5 ${risk.severity === "high" ? "text-red-500" : "text-amber-500"}`} />
-                    <span className="font-bold text-gray-900 text-lg">{risk.dept}</span>
-                    <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${risk.severity === "high" ? "bg-red-100 text-red-700" : "bg-amber-100 text-amber-700"}`}>
-                      {risk.severity === "high" ? "High Risk" : "Medium Risk"}
+            <div className="grid grid-cols-4 gap-4">
+              {healthScores.map((h) => (
+                <div key={h.label} className="bg-white/5 rounded-lg p-3 border border-white/8">
+                  <div className="text-[10px] text-white/40 mb-2 leading-tight">{h.label}</div>
+                  <div className="flex items-end gap-1 mb-2">
+                    <span className={`text-xl font-bold ${h.score >= 80 ? "text-emerald-400" : h.score >= 65 ? "text-amber-400" : "text-red-400"}`}>
+                      {h.score}
                     </span>
+                    <span className="text-xs text-white/30 mb-0.5">/ 100</span>
                   </div>
-                  <p className="text-sm text-gray-700 mb-3">{risk.issue}</p>
-                  <div className="flex items-start gap-2 bg-emerald-50 border border-emerald-200 rounded-lg p-3">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                    <div>
-                      <span className="text-xs font-semibold text-emerald-700 uppercase tracking-wide">AI Recommendation</span>
-                      <p className="text-sm text-emerald-800 mt-0.5">{risk.recommendation}</p>
-                    </div>
+                  <div className="h-1 bg-white/10 rounded-full overflow-hidden">
+                    <div
+                      className={`h-full rounded-full ${h.score >= 80 ? "bg-emerald-500" : h.score >= 65 ? "bg-amber-400" : "bg-red-500"}`}
+                      style={{ width: `${h.score}%` }}
+                    />
                   </div>
-                </div>
-                <button className="shrink-0 flex items-center gap-2 bg-gray-900 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-800 transition-colors">
-                  Fix Now
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            </div>
-          ))}
-
-          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
-            <h3 className="font-bold text-gray-900 mb-5">Team Communication Health</h3>
-            <div className="space-y-4">
-              {[
-                { team: "Dispatch ↔ Drivers", score: 92, color: "bg-emerald-500" },
-                { team: "Finance ↔ Dispatch", score: 61, color: "bg-amber-500" },
-                { team: "Maintenance ↔ Dispatch", score: 54, color: "bg-red-500" },
-                { team: "Leadership ↔ All Teams", score: 78, color: "bg-blue-500" },
-                { team: "Driver Ops ↔ Leadership", score: 47, color: "bg-red-500" },
-              ].map((item) => (
-                <div key={item.team}>
-                  <div className="flex items-center justify-between mb-1.5">
-                    <span className="text-sm text-gray-700">{item.team}</span>
-                    <span className={`text-sm font-bold ${item.score >= 80 ? "text-emerald-600" : item.score >= 60 ? "text-amber-600" : "text-red-600"}`}>
-                      {item.score}
-                    </span>
-                  </div>
-                  <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-                    <div className={`h-full ${item.color} rounded-full transition-all`} style={{ width: `${item.score}%` }} />
-                  </div>
+                  <div className="text-[9px] text-white/25 mt-1">Target: {h.target}</div>
                 </div>
               ))}
             </div>
+          </div>
+
+          <div className="space-y-4">
+            {siloRisks.map((risk, i) => {
+              const Icon = risk.icon;
+              return (
+                <div key={i} className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
+                  <div className="flex items-start gap-4">
+                    <div className="w-10 h-10 rounded-lg bg-red-50 border border-red-100 flex items-center justify-center shrink-0">
+                      <Icon className="w-5 h-5 text-red-500" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-2">
+                        <h3 className="font-semibold text-gray-900 text-sm">{risk.title}</h3>
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase ${
+                          risk.severity === "High" ? "bg-red-100 text-red-600" : "bg-amber-100 text-amber-600"
+                        }`}>
+                          {risk.severity} Risk
+                        </span>
+                      </div>
+                      <p className="text-xs text-gray-500 leading-relaxed mb-3">{risk.desc}</p>
+                      <div className="bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-2.5">
+                        <div className="flex items-start gap-2">
+                          <Zap className="w-3.5 h-3.5 text-emerald-600 mt-0.5 shrink-0" />
+                          <p className="text-xs text-emerald-700 font-medium">{risk.fix}</p>
+                        </div>
+                      </div>
+                    </div>
+                    <button className="text-xs text-amber-600 font-semibold hover:text-amber-700 shrink-0 flex items-center gap-1 mt-1">
+                      Fix Now <ChevronRight className="w-3 h-3" />
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       )}
