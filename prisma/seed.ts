@@ -4,15 +4,26 @@ import { PrismaClient } from "@prisma/client";
 import { PrismaLibSql } from "@prisma/adapter-libsql";
 import bcrypt from "bcryptjs";
 
-const dbUrl = process.env.DATABASE_URL ?? "file:./dev.db";
-// libsql requires absolute file path for local SQLite
-const absoluteUrl = dbUrl.startsWith("file:./")
-  ? `file://${path.resolve(dbUrl.replace("file:./", ""))}`
-  : dbUrl.startsWith("file:") && !dbUrl.startsWith("file://")
-  ? `file://${dbUrl.slice(5)}`
-  : dbUrl;
+const tursoUrl = process.env.TURSO_DATABASE_URL;
+const tursoToken = process.env.TURSO_AUTH_TOKEN;
 
-const adapter = new PrismaLibSql({ url: absoluteUrl });
+let dbUrl: string;
+let authToken: string | undefined;
+
+if (tursoUrl) {
+  dbUrl = tursoUrl;
+  authToken = tursoToken;
+} else {
+  const rawUrl = process.env.DATABASE_URL ?? "file:./dev.db";
+  // libsql requires absolute file path for local SQLite
+  dbUrl = rawUrl.startsWith("file:./")
+    ? `file://${path.resolve(rawUrl.replace("file:./", ""))}`
+    : rawUrl.startsWith("file:") && !rawUrl.startsWith("file://")
+    ? `file://${rawUrl.slice(5)}`
+    : rawUrl;
+}
+
+const adapter = new PrismaLibSql({ url: dbUrl, authToken });
 const prisma = new PrismaClient({ adapter });
 
 async function main() {
