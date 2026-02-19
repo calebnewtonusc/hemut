@@ -19,10 +19,10 @@ export default async function RootLayout({
 
   return (
     <html lang="en">
-      <body className={`${inter.className} flex h-screen overflow-hidden bg-[#f0f2f5] antialiased`}>
+      <body className={`${inter.className} flex h-screen overflow-hidden bg-[#080d1a] antialiased`}>
         <SessionProvider session={session}>
           <Sidebar />
-          <main className="flex-1 overflow-y-auto">{children}</main>
+          <main className="flex-1 overflow-y-auto bg-[#080d1a]">{children}</main>
         </SessionProvider>
       </body>
     </html>
