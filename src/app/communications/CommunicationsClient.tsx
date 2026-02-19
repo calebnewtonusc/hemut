@@ -80,42 +80,42 @@ const channelConfig: Record<
   compliance: {
     label: "Compliance",
     icon: Shield,
-    pillBg: "bg-red-500/15",
-    pillText: "text-red-400",
-    avatarBg: "bg-red-500/20",
-    avatarText: "text-red-300",
+    pillBg: "bg-white/[0.07]",
+    pillText: "text-white/45",
+    avatarBg: "bg-white/[0.08]",
+    avatarText: "text-white/50",
   },
   dispatch: {
     label: "Dispatch",
     icon: Radio,
-    pillBg: "bg-amber-500/15",
-    pillText: "text-amber-400",
-    avatarBg: "bg-amber-500/20",
-    avatarText: "text-amber-300",
+    pillBg: "bg-white/[0.07]",
+    pillText: "text-white/45",
+    avatarBg: "bg-white/[0.08]",
+    avatarText: "text-white/50",
   },
   driver: {
     label: "Driver",
     icon: Truck,
-    pillBg: "bg-blue-500/15",
-    pillText: "text-blue-400",
-    avatarBg: "bg-blue-500/20",
-    avatarText: "text-blue-300",
+    pillBg: "bg-white/[0.07]",
+    pillText: "text-white/45",
+    avatarBg: "bg-white/[0.08]",
+    avatarText: "text-white/50",
   },
   customer: {
     label: "Customer",
     icon: FileText,
-    pillBg: "bg-emerald-500/15",
-    pillText: "text-emerald-400",
-    avatarBg: "bg-emerald-500/20",
-    avatarText: "text-emerald-300",
+    pillBg: "bg-white/[0.07]",
+    pillText: "text-white/45",
+    avatarBg: "bg-white/[0.08]",
+    avatarText: "text-white/50",
   },
   team: {
     label: "Team",
     icon: Users,
-    pillBg: "bg-purple-500/15",
-    pillText: "text-purple-400",
-    avatarBg: "bg-purple-500/20",
-    avatarText: "text-purple-300",
+    pillBg: "bg-white/[0.07]",
+    pillText: "text-white/45",
+    avatarBg: "bg-white/[0.08]",
+    avatarText: "text-white/50",
   },
 };
 
@@ -275,8 +275,8 @@ function ComposeModal({ onClose }: { onClose: () => void }) {
 
         {sent ? (
           <div className="px-6 py-14 flex flex-col items-center gap-4">
-            <div className="w-12 h-12 rounded-full bg-emerald-500/15 border border-emerald-500/20 flex items-center justify-center">
-              <CheckCircle2 className="w-6 h-6 text-emerald-400" />
+            <div className="w-12 h-12 rounded-full bg-amber-500/15 border border-amber-500/20 flex items-center justify-center">
+              <CheckCircle2 className="w-6 h-6 text-amber-400" />
             </div>
             <p className="text-[13px] font-semibold text-white/80">Message sent</p>
           </div>
@@ -458,8 +458,8 @@ function ReplyDrawer({
         <div className="flex-1 px-6 py-5 flex flex-col overflow-y-auto">
           {sent ? (
             <div className="flex flex-col items-center justify-center flex-1 gap-4">
-              <div className="w-12 h-12 rounded-full bg-emerald-500/15 border border-emerald-500/20 flex items-center justify-center">
-                <CheckCircle2 className="w-6 h-6 text-emerald-400" />
+              <div className="w-12 h-12 rounded-full bg-amber-500/15 border border-amber-500/20 flex items-center justify-center">
+                <CheckCircle2 className="w-6 h-6 text-amber-400" />
               </div>
               <p className="text-[13px] font-semibold text-white/80">Reply sent</p>
             </div>
@@ -506,7 +506,7 @@ function ReplyDrawer({
                 onClick={() => setResolved((r) => !r)}
                 className={`px-4 py-2 rounded-xl text-[13px] font-medium border transition-colors ${
                   resolved
-                    ? "bg-emerald-500/15 border-emerald-500/20 text-emerald-400"
+                    ? "bg-amber-500/15 border-amber-500/20 text-amber-400"
                     : "bg-white/[0.05] border-white/[0.08] text-white/65 hover:text-white/85 hover:bg-white/[0.08]"
                 }`}
               >
@@ -619,21 +619,17 @@ export function CommunicationsClient() {
       </div>
 
       {/* KPI strip */}
-      <div className="grid grid-cols-4 gap-4 mb-8 shrink-0">
+      <div className="grid grid-cols-4 gap-6 mb-8 pb-6 border-b border-white/[0.05] shrink-0">
         {kpis.map((k) => {
           const Icon = k.icon;
           return (
-            <div key={k.label} className="bg-white/[0.025] border border-white/[0.06] rounded-2xl p-5">
-              <div className="flex items-start justify-between mb-3">
-                <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-white/30">
-                  {k.label}
-                </p>
-                <div className={`w-9 h-9 rounded-xl ${k.iconBg} border ${k.iconBorder} flex items-center justify-center shrink-0`}>
-                  <Icon className={`w-4 h-4 ${k.iconColor}`} />
-                </div>
+            <div key={k.label} className="flex flex-col gap-1">
+              <div className="flex items-center gap-1.5 mb-1">
+                <Icon className="w-3.5 h-3.5 text-white/20 shrink-0" />
+                <p className="text-[11px] text-white/35 font-medium">{k.label}</p>
               </div>
-              <p className="text-[28px] font-bold tracking-tight text-white leading-none">{k.value}</p>
-              <p className="text-[12px] text-white/35 mt-2">{k.sub}</p>
+              <p className="text-[26px] font-bold tracking-tight text-white leading-none">{k.value}</p>
+              <p className="text-[12px] text-white/30 mt-0.5">{k.sub}</p>
             </div>
           );
         })}
@@ -709,12 +705,8 @@ export function CommunicationsClient() {
                 tabIndex={0}
                 onClick={() => setReplyTarget(msg)}
                 onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setReplyTarget(msg); }}
-                className={`bg-white/[0.025] border border-white/[0.06] rounded-2xl p-5 cursor-pointer transition-all hover:bg-white/[0.04] hover:border-white/[0.09] ${
-                  msg.priority === "critical"
-                    ? "border-l-[3px] border-l-red-500"
-                    : msg.priority === "high"
-                    ? "border-l-[3px] border-l-amber-500"
-                    : ""
+                className={`border-b border-white/[0.05] py-4 cursor-pointer transition-colors hover:bg-white/[0.025] ${
+                  msg.priority === "critical" ? "pl-3 border-l-2 border-l-red-500/70 -ml-0" : msg.priority === "high" ? "pl-3 border-l-2 border-l-amber-500/50 -ml-0" : "pl-0"
                 }`}
               >
                 {/* Top row: priority + sender + time */}
