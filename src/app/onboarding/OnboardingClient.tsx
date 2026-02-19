@@ -65,36 +65,36 @@ const ROLE_LABEL: Record<Role, string> = {
 
 const ROLE_COLOR: Record<Role, { badge: string; bar: string; dot: string; border: string; icon: string; iconBg: string }> = {
   driver: {
-    badge: "bg-emerald-500/15 text-emerald-400 border-emerald-500/20",
-    bar: "bg-emerald-500",
-    dot: "bg-emerald-400",
-    border: "border-emerald-500/30",
-    icon: "text-emerald-400",
-    iconBg: "bg-emerald-500/10 border border-emerald-500/15",
-  },
-  dispatcher: {
-    badge: "bg-sky-500/15 text-sky-400 border-sky-500/20",
-    bar: "bg-sky-500",
-    dot: "bg-sky-400",
-    border: "border-sky-500/30",
-    icon: "text-sky-400",
-    iconBg: "bg-sky-500/10 border border-sky-500/15",
-  },
-  finance: {
-    badge: "bg-violet-500/15 text-violet-400 border-violet-500/20",
-    bar: "bg-violet-500",
-    dot: "bg-violet-400",
-    border: "border-violet-500/30",
-    icon: "text-violet-400",
-    iconBg: "bg-violet-500/10 border border-violet-500/15",
-  },
-  admin: {
-    badge: "bg-amber-500/15 text-amber-400 border-amber-500/20",
+    badge: "bg-white/[0.07] text-white/55 border-white/[0.1]",
     bar: "bg-amber-500",
     dot: "bg-amber-400",
-    border: "border-amber-500/30",
-    icon: "text-amber-400",
-    iconBg: "bg-amber-500/10 border border-amber-500/15",
+    border: "border-white/[0.08]",
+    icon: "text-white/45",
+    iconBg: "bg-white/[0.05] border border-white/[0.08]",
+  },
+  dispatcher: {
+    badge: "bg-white/[0.07] text-white/55 border-white/[0.1]",
+    bar: "bg-amber-500",
+    dot: "bg-amber-400",
+    border: "border-white/[0.08]",
+    icon: "text-white/45",
+    iconBg: "bg-white/[0.05] border border-white/[0.08]",
+  },
+  finance: {
+    badge: "bg-white/[0.07] text-white/55 border-white/[0.1]",
+    bar: "bg-amber-500",
+    dot: "bg-amber-400",
+    border: "border-white/[0.08]",
+    icon: "text-white/45",
+    iconBg: "bg-white/[0.05] border border-white/[0.08]",
+  },
+  admin: {
+    badge: "bg-white/[0.07] text-white/55 border-white/[0.1]",
+    bar: "bg-amber-500",
+    dot: "bg-amber-400",
+    border: "border-white/[0.08]",
+    icon: "text-white/45",
+    iconBg: "bg-white/[0.05] border border-white/[0.08]",
   },
 };
 
@@ -365,7 +365,7 @@ function DetailDrawer({ member, onClose, onToggleTask, onUpdateNotes, onMarkComp
               <span className="text-[14px] font-semibold text-white">{member.name}</span>
               <RoleBadge role={member.role} />
               {member.preHire && (
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-violet-500/15 text-violet-400 border border-violet-500/20 font-semibold">
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/[0.07] text-white/45 border border-white/[0.1] font-semibold">
                   Pre-Hire
                 </span>
               )}
@@ -384,12 +384,12 @@ function DetailDrawer({ member, onClose, onToggleTask, onUpdateNotes, onMarkComp
           {/* Progress section */}
           <div className="bg-white/[0.025] border border-white/[0.06] rounded-2xl p-5 space-y-3">
             <div className="flex items-center justify-between">
-              <span className="text-[11px] font-bold uppercase tracking-[0.1em] text-white/25">Progress</span>
+              <span className="text-[11px] text-white/35 font-medium">Progress</span>
               <span className="text-[13px] font-bold text-white">{member.progress}%</span>
             </div>
             <div className="h-1.5 rounded-full bg-white/[0.08] overflow-hidden">
               <div
-                className={`h-full rounded-full transition-all ${member.progress === 100 ? "bg-emerald-500" : "bg-amber-500"}`}
+                className={`h-full rounded-full transition-all ${"bg-amber-500"}`}
                 style={{ width: `${member.progress}%` }}
               />
             </div>
@@ -410,7 +410,7 @@ function DetailDrawer({ member, onClose, onToggleTask, onUpdateNotes, onMarkComp
 
           {/* Full task list */}
           <div>
-            <div className="text-[11px] font-bold uppercase tracking-[0.1em] text-white/25 mb-3">
+            <div className="text-[11px] text-white/35 font-medium mb-3">
               Full Checklist
             </div>
             <div className="space-y-0.5">
@@ -442,7 +442,7 @@ function DetailDrawer({ member, onClose, onToggleTask, onUpdateNotes, onMarkComp
           <div>
             <div className="flex items-center gap-2 mb-2.5">
               <StickyNote className="w-3.5 h-3.5 text-white/25" />
-              <span className="text-[11px] font-bold uppercase tracking-[0.1em] text-white/25">Notes</span>
+              <span className="text-[11px] text-white/35 font-medium">Notes</span>
             </div>
             <textarea
               value={member.notes}
@@ -528,7 +528,7 @@ function NewOnboardingModal({ onClose, onSubmit }: NewOnboardingModalProps) {
           {/* Form fields */}
           <div className="space-y-5">
             <div>
-              <label htmlFor="onboard-name" className="block text-[11px] font-bold uppercase tracking-[0.1em] text-white/25 mb-1.5">
+              <label htmlFor="onboard-name" className="block text-[11px] text-white/35 font-medium mb-1.5">
                 Full Name
               </label>
               <input
@@ -542,7 +542,7 @@ function NewOnboardingModal({ onClose, onSubmit }: NewOnboardingModalProps) {
             </div>
 
             <div>
-              <label htmlFor="onboard-role" className="block text-[11px] font-bold uppercase tracking-[0.1em] text-white/25 mb-1.5">
+              <label htmlFor="onboard-role" className="block text-[11px] text-white/35 font-medium mb-1.5">
                 Role
               </label>
               <select
@@ -561,7 +561,7 @@ function NewOnboardingModal({ onClose, onSubmit }: NewOnboardingModalProps) {
             </div>
 
             <div>
-              <label htmlFor="onboard-startdate" className="block text-[11px] font-bold uppercase tracking-[0.1em] text-white/25 mb-1.5">
+              <label htmlFor="onboard-startdate" className="block text-[11px] text-white/35 font-medium mb-1.5">
                 Start Date
               </label>
               <input
@@ -575,7 +575,7 @@ function NewOnboardingModal({ onClose, onSubmit }: NewOnboardingModalProps) {
             </div>
 
             <div>
-              <label htmlFor="onboard-mentor" className="block text-[11px] font-bold uppercase tracking-[0.1em] text-white/25 mb-1.5">
+              <label htmlFor="onboard-mentor" className="block text-[11px] text-white/35 font-medium mb-1.5">
                 Mentor
               </label>
               <input
@@ -627,15 +627,13 @@ function KpiCard({
   valueColor?: string;
 }) {
   return (
-    <div className="bg-white/[0.025] border border-white/[0.06] rounded-2xl p-5 flex items-start justify-between">
-      <div>
-        <div className="text-[11px] font-bold uppercase tracking-[0.07em] text-white/35 mb-3">{label}</div>
-        <div className={`text-[28px] font-bold tracking-tight leading-none ${valueColor ?? "text-white"}`}>{value}</div>
-        <div className="text-[12px] text-white/35 mt-2">{sub}</div>
+    <div className="flex flex-col gap-1">
+      <div className="flex items-center gap-1.5 mb-1">
+        <Icon className="w-3.5 h-3.5 text-white/20 shrink-0" />
+        <div className="text-[11px] text-white/35 font-medium">{label}</div>
       </div>
-      <div className="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/15 flex items-center justify-center shrink-0">
-        <Icon className="w-4 h-4 text-amber-400" />
-      </div>
+      <div className={`text-[26px] font-bold tracking-tight leading-none ${valueColor ?? "text-white"}`}>{value}</div>
+      <div className="text-[12px] text-white/30 mt-0.5">{sub}</div>
     </div>
   );
 }
@@ -676,7 +674,7 @@ function MemberCard({ member, onViewDetails }: MemberCardProps) {
         <div className="flex flex-col items-end gap-1.5 shrink-0">
           <RoleBadge role={member.role} />
           {member.preHire && (
-            <span className="text-[10px] px-2 py-0.5 rounded-full bg-violet-500/15 text-violet-400 border border-violet-500/20 font-semibold">
+            <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/[0.07] text-white/45 border border-white/[0.1] font-semibold">
               Pre-Hire
             </span>
           )}
@@ -692,12 +690,12 @@ function MemberCard({ member, onViewDetails }: MemberCardProps) {
       {/* Progress bar */}
       <div className="mt-2">
         <div className="flex items-center justify-between mb-1.5">
-          <span className="text-[11px] font-bold uppercase tracking-[0.07em] text-white/25">Progress</span>
+          <span className="text-[11px] text-white/35 font-medium">Progress</span>
           <span className="text-[12px] font-semibold text-white/55">{member.progress}%</span>
         </div>
         <div className="h-1.5 rounded-full bg-white/[0.08] overflow-hidden">
           <div
-            className={`h-full rounded-full transition-all ${member.progress === 100 ? "bg-emerald-500" : "bg-amber-500"}`}
+            className={`h-full rounded-full transition-all ${"bg-amber-500"}`}
             style={{ width: `${member.progress}%` }}
           />
         </div>
@@ -908,7 +906,7 @@ export function OnboardingClient() {
       </div>
 
       {/* ── KPI Strip ────────────────────────────────────────────────────────── */}
-      <div className="grid grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-4 gap-6 mb-8 pb-6 border-b border-white/[0.05]">
         <KpiCard
           label="Active Onboardees"
           value="4"
@@ -926,7 +924,7 @@ export function OnboardingClient() {
           value="100%"
           sub="All pre-hires cleared"
           icon={Shield}
-          valueColor="text-emerald-400"
+          valueColor="text-amber-400"
         />
         <KpiCard
           label="Pending Actions"
@@ -1012,7 +1010,7 @@ export function OnboardingClient() {
         <div>
           {/* Filter bar */}
           <div className="flex items-center gap-3 mb-5">
-            <span className="text-[11px] font-bold uppercase tracking-[0.1em] text-white/25 mr-1">
+            <span className="text-[11px] text-white/35 font-medium mr-1">
               Filter
             </span>
             {(["all", "driver", "dispatcher", "finance", "admin"] as const).map((r) => (
