@@ -70,10 +70,10 @@ interface ComposeState {
 
 // ─── Config ──────────────────────────────────────────────────
 const TYPE_CONFIG: Record<NewsletterType, { label: string; pill: string; bar: string; text: string }> = {
-  "weekly-ops":      { label: "Weekly Ops",     pill: "bg-amber-500/15 text-amber-400 border border-amber-500/20",   bar: "bg-amber-500",    text: "text-amber-400" },
-  "driver-bulletin": { label: "Driver Bulletin", pill: "bg-sky-500/15 text-sky-400 border border-sky-500/20",         bar: "bg-sky-500",      text: "text-sky-400" },
-  "finance-brief":   { label: "Finance Brief",   pill: "bg-violet-500/15 text-violet-400 border border-violet-500/20", bar: "bg-violet-500",   text: "text-violet-400" },
-  "company-wide":    { label: "Company-Wide",    pill: "bg-emerald-500/15 text-emerald-400 border border-emerald-500/20", bar: "bg-emerald-500", text: "text-emerald-400" },
+  "weekly-ops":      { label: "Weekly Ops",     pill: "bg-white/[0.07] text-white/50 border border-white/[0.1]",     bar: "bg-amber-500", text: "text-white/50" },
+  "driver-bulletin": { label: "Driver Bulletin", pill: "bg-white/[0.07] text-white/50 border border-white/[0.1]",     bar: "bg-amber-500", text: "text-white/50" },
+  "finance-brief":   { label: "Finance Brief",   pill: "bg-white/[0.07] text-white/50 border border-white/[0.1]",     bar: "bg-amber-500", text: "text-white/50" },
+  "company-wide":    { label: "Company-Wide",    pill: "bg-white/[0.07] text-white/50 border border-white/[0.1]",     bar: "bg-amber-500", text: "text-white/50" },
 };
 
 const STATUS_CONFIG: Record<Status, { label: string; pill: string; icon: React.ElementType }> = {
@@ -199,18 +199,18 @@ const BLUEPRINTS: Blueprint[] = [
 ];
 
 const BLUEPRINT_COLORS: Record<string, { accent: string; iconBg: string; iconBorder: string; dot: string; btn: string; border: string; hoverBorder: string }> = {
-  amber:   { accent: "text-amber-400",   iconBg: "bg-amber-500/10",   iconBorder: "border-amber-500/15",   dot: "bg-amber-400",   btn: "text-amber-400 hover:text-amber-300", border: "border-amber-500/20",   hoverBorder: "hover:border-amber-500/20" },
-  sky:     { accent: "text-sky-400",     iconBg: "bg-sky-500/10",     iconBorder: "border-sky-500/15",     dot: "bg-sky-400",     btn: "text-sky-400 hover:text-sky-300",     border: "border-sky-500/20",     hoverBorder: "hover:border-sky-500/20" },
-  violet:  { accent: "text-violet-400",  iconBg: "bg-violet-500/10",  iconBorder: "border-violet-500/15",  dot: "bg-violet-400",  btn: "text-violet-400 hover:text-violet-300",  border: "border-violet-500/20",  hoverBorder: "hover:border-violet-500/20" },
-  emerald: { accent: "text-emerald-400", iconBg: "bg-emerald-500/10", iconBorder: "border-emerald-500/15", dot: "bg-emerald-400", btn: "text-emerald-400 hover:text-emerald-300", border: "border-emerald-500/20", hoverBorder: "hover:border-emerald-500/20" },
+  amber:   { accent: "text-amber-400",  iconBg: "bg-amber-500/10",  iconBorder: "border-amber-500/15",  dot: "bg-amber-400",  btn: "text-amber-400 hover:text-amber-300",  border: "border-white/[0.08]",  hoverBorder: "hover:border-amber-500/20" },
+  sky:     { accent: "text-amber-400",  iconBg: "bg-amber-500/10",  iconBorder: "border-amber-500/15",  dot: "bg-amber-400",  btn: "text-amber-400 hover:text-amber-300",  border: "border-white/[0.08]",  hoverBorder: "hover:border-amber-500/20" },
+  violet:  { accent: "text-amber-400",  iconBg: "bg-amber-500/10",  iconBorder: "border-amber-500/15",  dot: "bg-amber-400",  btn: "text-amber-400 hover:text-amber-300",  border: "border-white/[0.08]",  hoverBorder: "hover:border-amber-500/20" },
+  emerald: { accent: "text-amber-400",  iconBg: "bg-amber-500/10",  iconBorder: "border-amber-500/15",  dot: "bg-amber-400",  btn: "text-amber-400 hover:text-amber-300",  border: "border-white/[0.08]",  hoverBorder: "hover:border-amber-500/20" },
 };
 
 // Modal blueprint chip colors (for selected state)
 const MODAL_BLUEPRINT_SELECTED: Record<string, string> = {
   amber:   "bg-amber-500/10 border-amber-500/30 text-amber-300",
-  sky:     "bg-sky-500/10 border-sky-500/30 text-sky-300",
-  violet:  "bg-violet-500/10 border-violet-500/30 text-violet-300",
-  emerald: "bg-emerald-500/10 border-emerald-500/30 text-emerald-300",
+  sky:     "bg-amber-500/10 border-amber-500/30 text-amber-300",
+  violet:  "bg-amber-500/10 border-amber-500/30 text-amber-300",
+  emerald: "bg-amber-500/10 border-amber-500/30 text-amber-300",
 };
 
 const RECIPIENT_OPTIONS = [
@@ -318,17 +318,13 @@ function KpiCard({
   icon: React.ElementType;
 }) {
   return (
-    <div className="bg-white/[0.025] border border-white/[0.06] rounded-2xl p-5">
-      <div className="flex items-start justify-between">
-        <div>
-          <div className="text-[11px] font-bold uppercase tracking-[0.07em] text-white/35 mb-3">{label}</div>
-          <div className="text-[28px] font-bold tracking-tight text-white leading-none">{value}</div>
-          {subtitle && <div className="text-[12px] text-white/35 mt-2">{subtitle}</div>}
-        </div>
-        <div className="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/15 flex items-center justify-center shrink-0">
-          <Icon className="w-4 h-4 text-amber-400" />
-        </div>
+    <div className="flex flex-col gap-1">
+      <div className="flex items-center gap-1.5 mb-1">
+        <Icon className="w-3.5 h-3.5 text-white/20 shrink-0" />
+        <div className="text-[11px] text-white/35 font-medium">{label}</div>
       </div>
+      <div className="text-[26px] font-bold tracking-tight text-white leading-none">{value}</div>
+      <div className="text-[12px] text-white/30 mt-0.5">{subtitle}</div>
     </div>
   );
 }
@@ -388,10 +384,10 @@ function NewsletterRow({ nl, onEdit }: { nl: Newsletter; onEdit: () => void }) {
         <div className="w-48 shrink-0">
           {nl.openRate !== undefined ? (
             <div>
-              <div className="text-[11px] uppercase tracking-[0.07em] text-white/30 mb-2">Open Rate</div>
+              <div className="text-[11px] text-white/35 font-medium mb-2">Open Rate</div>
               <div className="bg-white/[0.07] rounded-full h-1.5 overflow-hidden mb-1.5">
                 <div
-                  className="bg-emerald-500 h-full rounded-full transition-all"
+                  className="bg-amber-500 h-full rounded-full transition-all"
                   style={{ width: `${nl.openRate}%` }}
                 />
               </div>
@@ -586,7 +582,7 @@ function ComposeModal({
 
         {/* Blueprint selector */}
         <div className="mb-5">
-          <div className="text-[11px] font-bold uppercase tracking-[0.1em] text-white/25 mb-2">
+          <div className="text-[11px] text-white/35 font-medium mb-2">
             Blueprint — optional, pre-fills fields
           </div>
           <div className="grid grid-cols-2 gap-2">
@@ -862,7 +858,7 @@ export function NewsletterClient() {
       </div>
 
       {/* KPI strip */}
-      <div className="grid grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-4 gap-6 mb-8 pb-6 border-b border-white/[0.05]">
         <KpiCard label="Sent This Month"  value="6"    subtitle="newsletters"     icon={Send} />
         <KpiCard label="Total Recipients" value="104"  subtitle="team members"    icon={Users} />
         <KpiCard label="Avg Open Rate"    value="86%"  subtitle="last 30 days"    icon={TrendingUp} />
