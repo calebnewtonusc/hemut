@@ -71,6 +71,13 @@ const sections: NavSection[] = [
   },
 ];
 
+const ROLE_LABELS: Record<string, string> = {
+  ADMIN: "Ops Manager",
+  DISPATCHER: "Dispatcher",
+  DRIVER: "Driver",
+  MANAGER: "Fleet Manager",
+};
+
 const badgeStyles: Record<string, string> = {
   red: "bg-red-500/20 text-red-400",
   emerald: "bg-emerald-500/20 text-emerald-400",
@@ -178,7 +185,7 @@ export function Sidebar() {
           </div>
           <div className="flex-1 min-w-0">
             <div className="text-[12px] font-semibold text-white/90 truncate">{session?.user?.name ?? "Ricky Maldonado"}</div>
-            <div className="text-[10px] text-white/30 truncate">{(session?.user as { role?: string })?.role ?? "Ops Manager"}</div>
+            <div className="text-[10px] text-white/30 truncate">{ROLE_LABELS[(session?.user as { role?: string })?.role ?? ""] ?? (session?.user as { role?: string })?.role ?? "Ops Manager"}</div>
           </div>
           <button
             onClick={() => signOut({ callbackUrl: "/login" })}
