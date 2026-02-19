@@ -23,12 +23,13 @@ import {
   Pencil,
   AlertCircle,
   FileText,
+  Sparkles,
 } from "lucide-react";
 
 // ─── Types ───────────────────────────────────────────────────
 type NewsletterType = "weekly-ops" | "driver-bulletin" | "finance-brief" | "company-wide";
 type Status = "draft" | "scheduled" | "sent";
-type ActiveTab = "newsletters" | "blueprints" | "guide";
+type ActiveTab = "newsletters" | "blueprints";
 
 interface Newsletter {
   id: string;
@@ -69,16 +70,16 @@ interface ComposeState {
 
 // ─── Config ──────────────────────────────────────────────────
 const TYPE_CONFIG: Record<NewsletterType, { label: string; pill: string; bar: string; text: string }> = {
-  "weekly-ops":      { label: "Weekly Ops",    pill: "bg-blue-400/15 text-blue-400 border border-blue-400/20",   bar: "bg-blue-400",    text: "text-blue-400" },
-  "driver-bulletin": { label: "Driver Bulletin", pill: "bg-amber-400/15 text-amber-400 border border-amber-400/20", bar: "bg-amber-400",   text: "text-amber-400" },
-  "finance-brief":   { label: "Finance Brief",  pill: "bg-emerald-400/15 text-emerald-400 border border-emerald-400/20", bar: "bg-emerald-400", text: "text-emerald-400" },
-  "company-wide":    { label: "Company-Wide",   pill: "bg-violet-400/15 text-violet-400 border border-violet-400/20",  bar: "bg-violet-400",  text: "text-violet-400" },
+  "weekly-ops":      { label: "Weekly Ops",     pill: "bg-amber-500/15 text-amber-400 border border-amber-500/20",   bar: "bg-amber-500",    text: "text-amber-400" },
+  "driver-bulletin": { label: "Driver Bulletin", pill: "bg-sky-500/15 text-sky-400 border border-sky-500/20",         bar: "bg-sky-500",      text: "text-sky-400" },
+  "finance-brief":   { label: "Finance Brief",   pill: "bg-violet-500/15 text-violet-400 border border-violet-500/20", bar: "bg-violet-500",   text: "text-violet-400" },
+  "company-wide":    { label: "Company-Wide",    pill: "bg-emerald-500/15 text-emerald-400 border border-emerald-500/20", bar: "bg-emerald-500", text: "text-emerald-400" },
 };
 
 const STATUS_CONFIG: Record<Status, { label: string; pill: string; icon: React.ElementType }> = {
-  sent:      { label: "Sent",      pill: "bg-emerald-500/15 text-emerald-400 border border-emerald-500/20", icon: CheckCircle2 },
-  scheduled: { label: "Scheduled", pill: "bg-amber-400/15 text-amber-400 border border-amber-400/20",       icon: Clock },
-  draft:     { label: "Draft",     pill: "bg-white/5 text-white/40 border border-white/10",                  icon: Pencil },
+  sent:      { label: "SENT",      pill: "bg-emerald-500/15 text-emerald-400 border border-emerald-500/20", icon: CheckCircle2 },
+  scheduled: { label: "SCHEDULED", pill: "bg-sky-500/15 text-sky-400 border border-sky-500/20",             icon: Clock },
+  draft:     { label: "DRAFT",     pill: "bg-white/[0.07] text-white/40 border border-white/[0.1]",          icon: Pencil },
 };
 
 // ─── Data ────────────────────────────────────────────────────
@@ -141,7 +142,7 @@ const BLUEPRINTS: Blueprint[] = [
       "Upcoming route changes",
       "Action items & priorities",
     ],
-    color: "blue",
+    color: "amber",
     icon: BarChart2,
   },
   {
@@ -158,7 +159,7 @@ const BLUEPRINTS: Blueprint[] = [
       "Equipment & ELD updates",
       "Recognition & shoutouts",
     ],
-    color: "amber",
+    color: "sky",
     icon: Truck,
   },
   {
@@ -175,7 +176,7 @@ const BLUEPRINTS: Blueprint[] = [
       "IFTA & compliance filings",
       "Cash flow & forecast",
     ],
-    color: "emerald",
+    color: "violet",
     icon: DollarSign,
   },
   {
@@ -192,16 +193,24 @@ const BLUEPRINTS: Blueprint[] = [
       "Leadership message",
       "Upcoming events",
     ],
-    color: "purple",
+    color: "emerald",
     icon: Users,
   },
 ];
 
-const BLUEPRINT_COLORS: Record<string, { accent: string; muted: string; dot: string; btn: string; text: string; border: string }> = {
-  blue:    { accent: "text-blue-400",    muted: "text-blue-400/60",    dot: "bg-blue-400",    btn: "bg-blue-400/10 hover:bg-blue-400/20 text-blue-400 border border-blue-400/20",    text: "text-blue-400",    border: "border-blue-400/20" },
-  amber:   { accent: "text-amber-400",   muted: "text-amber-400/60",   dot: "bg-amber-400",   btn: "bg-amber-400/10 hover:bg-amber-400/20 text-amber-400 border border-amber-400/20",   text: "text-amber-400",   border: "border-amber-400/20" },
-  emerald: { accent: "text-emerald-400", muted: "text-emerald-400/60", dot: "bg-emerald-400", btn: "bg-emerald-400/10 hover:bg-emerald-400/20 text-emerald-400 border border-emerald-400/20", text: "text-emerald-400", border: "border-emerald-400/20" },
-  purple:  { accent: "text-violet-400",  muted: "text-violet-400/60",  dot: "bg-violet-400",  btn: "bg-violet-400/10 hover:bg-violet-400/20 text-violet-400 border border-violet-400/20",  text: "text-violet-400",  border: "border-violet-400/20" },
+const BLUEPRINT_COLORS: Record<string, { accent: string; iconBg: string; iconBorder: string; dot: string; btn: string; border: string; hoverBorder: string }> = {
+  amber:   { accent: "text-amber-400",   iconBg: "bg-amber-500/10",   iconBorder: "border-amber-500/15",   dot: "bg-amber-400",   btn: "text-amber-400 hover:text-amber-300", border: "border-amber-500/20",   hoverBorder: "hover:border-amber-500/20" },
+  sky:     { accent: "text-sky-400",     iconBg: "bg-sky-500/10",     iconBorder: "border-sky-500/15",     dot: "bg-sky-400",     btn: "text-sky-400 hover:text-sky-300",     border: "border-sky-500/20",     hoverBorder: "hover:border-sky-500/20" },
+  violet:  { accent: "text-violet-400",  iconBg: "bg-violet-500/10",  iconBorder: "border-violet-500/15",  dot: "bg-violet-400",  btn: "text-violet-400 hover:text-violet-300",  border: "border-violet-500/20",  hoverBorder: "hover:border-violet-500/20" },
+  emerald: { accent: "text-emerald-400", iconBg: "bg-emerald-500/10", iconBorder: "border-emerald-500/15", dot: "bg-emerald-400", btn: "text-emerald-400 hover:text-emerald-300", border: "border-emerald-500/20", hoverBorder: "hover:border-emerald-500/20" },
+};
+
+// Modal blueprint chip colors (for selected state)
+const MODAL_BLUEPRINT_SELECTED: Record<string, string> = {
+  amber:   "bg-amber-500/10 border-amber-500/30 text-amber-300",
+  sky:     "bg-sky-500/10 border-sky-500/30 text-sky-300",
+  violet:  "bg-violet-500/10 border-violet-500/30 text-violet-300",
+  emerald: "bg-emerald-500/10 border-emerald-500/30 text-emerald-300",
 };
 
 const RECIPIENT_OPTIONS = [
@@ -211,15 +220,115 @@ const RECIPIENT_OPTIONS = [
   "Entire Hemut Team (104)",
 ];
 
+// ─── AI Draft Content ─────────────────────────────────────────
+const AI_DRAFTS: Record<string, string> = {
+  "weekly-ops": `## Fleet KPIs & Utilization
+
+Fleet at **84% utilization** for week of Feb 11–17. 247 loads managed, 41,200 revenue miles. Average RPM: **$2.91/mi** (↑ $0.04 from prior week). On-time delivery: 96.3%.
+
+## Load Highlights
+
+Top-performing load: L-8821 Dallas run at $3.40/mi. Longest haul: L-8819 Phoenix, 680 miles. Driver spotlight: K. Johnson (D-028) — 5th consecutive on-time delivery this week.
+
+## Upcoming Route Changes
+
+I-80 winter weather advisory active through Feb 20. Recommend routing Nebraska-bound loads via I-70 alternate corridor. Update ETA estimates by +45 min for affected loads.
+
+## Action Items
+
+1. Assign L-8816 (Seattle → Portland) by 3:00 PM today — M. Garcia recommended (Dispatch)
+2. Complete T. Patel HOS corrective action form by Feb 19 (Safety)
+3. Schedule T-031 preventive maintenance Feb 19 AM (Fleet)`,
+
+  "driver-bulletin": `## Safety Alerts & Weather
+
+Winter weather advisory active on I-80 (Wyoming) and I-70 (Colorado) through Feb 20. Reduce speed, increase following distance, and report road conditions to dispatch every 100 miles in affected areas. Chain laws may apply.
+
+## HOS & Regulatory Reminder
+
+The 11-hour daily driving limit is strictly enforced. If you are within 30 minutes of your limit, call dispatch immediately — never push through your clock. Your ELD logs are reviewed daily and any anomalies are flagged automatically.
+
+## Payroll Update
+
+Pay cycle closes Feb 20. All miles, stops, and detention time through Feb 19 at 11:59 PM will be included. Direct deposit processes Feb 21. Contact HR for any discrepancies.
+
+## ELD Update
+
+New ELD firmware v3.2.1 available. Update must be completed by Feb 28. See your dispatcher for update instructions. This update improves HOS clock accuracy and adds Wi-Fi sync.
+
+## Driver Spotlight
+
+This week's recognition goes to K. Johnson (D-028) — 5 consecutive on-time deliveries with zero compliance issues. Outstanding professionalism. Thank you!`,
+
+  "finance-brief": `## Revenue & RPM Summary
+
+January revenue: **$847,200** (↑ 6.2% vs. December). Average RPM: $2.91/mi (↑ from $2.87 in Q4). Total revenue miles: 291,100. Fleet utilization: 84% (target: 88%).
+
+## Invoice Aging Report
+
+Outstanding AR: $124,500 across 23 open invoices. **7 invoices aging >30 days** ($43,200 total) — action required. Top priority: Walmart DC #INV-2481 ($18,400, 34 days). Suggest follow-up call before Feb 21.
+
+## Fuel Cost Variance
+
+January fuel spend: $89,400 vs. budget of $82,000 (+$7,400 over). Primary driver: California fuel surcharge spike (+18¢/gal). Hedging review scheduled for Feb 28 stand-up.
+
+## IFTA & Compliance Filings
+
+Q4 IFTA report due Feb 28. Mileage data compiled and ready for review. No discrepancies flagged. Tax liability estimate: $12,400.
+
+## Cash Flow & Q1 Forecast
+
+Q1 revenue forecast: **$2.6M** at current run rate. Cash position healthy at 42 DSO. No factoring adjustments needed this month. Q1 profitability on track.`,
+
+  "company-wide": `## A Note from Leadership
+
+Team — Q1 is off to one of our strongest starts yet. 96.3% on-time, $2.91/mi average RPM, and zero lost-time safety incidents in January. This is exactly what we built Hemut to do. Thank you.
+
+## Welcome to the Team
+
+Please join us in welcoming three new team members: **Sarah Chen** (CDL Driver), **David Reyes** (Dispatcher), and **James Liu** (Admin). They are in their first weeks of the Hemut onboarding framework — let's make them feel at home.
+
+## Safety Recognition
+
+**January Safety Star: K. Johnson (D-028)** — 5 consecutive on-time deliveries with zero violations or incidents. Recognized at this week's all-hands stand-up. This is what professional driving looks like.
+
+## What's Next in Q1
+
+- Fleet expansion to 55 trucks arriving in March
+- ELD firmware upgrade for all units by Feb 28
+- Q1 team offsite — date to be announced
+
+We are building something special here. Let's close Q1 strong. — The Hemut Leadership Team`,
+};
+
+function getDraft(typeOrBlueprint: string): string {
+  return AI_DRAFTS[typeOrBlueprint] ?? "";
+}
+
 // ─── KPI Card ────────────────────────────────────────────────
-function KpiCard({ label, value, icon: Icon, iconClass }: { label: string; value: string; icon: React.ElementType; iconClass: string }) {
+function KpiCard({
+  label,
+  value,
+  subtitle,
+  icon: Icon,
+}: {
+  label: string;
+  value: string;
+  subtitle?: string;
+  icon: React.ElementType;
+}) {
   return (
-    <div className="bg-white/[0.03] border border-white/[0.06] rounded-xl p-5">
-      <div className={`w-9 h-9 rounded-lg bg-white/[0.06] flex items-center justify-center mb-4 ${iconClass}`}>
-        <Icon className="w-4 h-4" />
+    <div className="bg-white/[0.025] border border-white/[0.06] rounded-2xl p-5">
+      <div className="flex items-start justify-between">
+        <div>
+          <div className="text-[11px] font-bold uppercase tracking-[0.07em] text-white/35 mb-3">{label}</div>
+          <div className="text-[28px] font-bold tracking-tight text-white leading-none">{value}</div>
+          {subtitle && <div className="text-[12px] text-white/35 mt-2">{subtitle}</div>}
+        </div>
+        <div className="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/15 flex items-center justify-center shrink-0">
+          <Icon className="w-4 h-4 text-amber-400" />
+        </div>
       </div>
-      <div className="text-2xl font-bold text-white mb-0.5">{value}</div>
-      <div className="text-xs text-white/40">{label}</div>
     </div>
   );
 }
@@ -228,80 +337,112 @@ function KpiCard({ label, value, icon: Icon, iconClass }: { label: string; value
 function NewsletterRow({ nl, onEdit }: { nl: Newsletter; onEdit: () => void }) {
   const type = TYPE_CONFIG[nl.type];
   const status = STATUS_CONFIG[nl.status];
-  const StatusIcon = status.icon;
 
   return (
-    <div className="bg-white/[0.03] border border-white/[0.06] rounded-xl p-5 hover:bg-white/[0.05] transition-colors">
-      <div className="flex items-start justify-between gap-4">
+    <div className="bg-white/[0.025] border border-white/[0.06] rounded-2xl p-5 mb-4 hover:bg-white/[0.04] hover:border-white/[0.09] transition-all cursor-default">
+      <div className="flex items-center gap-5">
+        {/* Left section */}
         <div className="flex-1 min-w-0">
-          {/* Title + badges */}
-          <div className="flex items-center gap-2.5 flex-wrap mb-2.5">
-            <h3 className="font-semibold text-white text-sm">{nl.title}</h3>
-            <span className={`text-[10px] px-2 py-0.5 rounded-full font-semibold whitespace-nowrap ${type.pill}`}>
+          {/* Title row */}
+          <div className="flex items-center gap-2 flex-wrap mb-1.5">
+            <h3 className="text-[15px] font-semibold text-white/90">{nl.title}</h3>
+            <span className={`text-[11px] font-semibold px-2.5 py-0.5 rounded-full whitespace-nowrap ${type.pill}`}>
               {type.label}
             </span>
-            <span className={`flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full font-semibold whitespace-nowrap ${status.pill}`}>
-              <StatusIcon className="w-2.5 h-2.5" />
+            <span className={`text-[11px] font-semibold px-2.5 py-0.5 rounded-full uppercase whitespace-nowrap ${status.pill}`}>
               {status.label}
             </span>
           </div>
 
-          {/* Meta row */}
-          <div className="flex items-center gap-4 flex-wrap text-xs text-white/40 mb-3">
-            <span className="flex items-center gap-1.5">
+          {/* Subtitle row */}
+          <div className="flex items-center gap-3 flex-wrap mb-2">
+            <span className="text-[12px] text-white/40 flex items-center gap-1.5">
               <Users className="w-3 h-3 shrink-0" />
-              {nl.audience} ({nl.recipientCount})
+              {nl.audience} · {nl.recipientCount} recipients
             </span>
             {nl.scheduledFor && (
-              <span className="flex items-center gap-1.5">
+              <span className="text-[12px] text-white/40 flex items-center gap-1.5">
                 <Clock className="w-3 h-3 shrink-0" />
-                Sends: {nl.scheduledFor}
+                Sends {nl.scheduledFor}
               </span>
             )}
             {nl.sentAt && (
-              <span className="flex items-center gap-1.5">
+              <span className="text-[12px] text-white/40 flex items-center gap-1.5">
                 <CheckCircle2 className="w-3 h-3 shrink-0" />
-                Sent: {nl.sentAt}
+                Sent {nl.sentAt}
               </span>
             )}
           </div>
 
-          {/* Open rate bar */}
-          {nl.openRate !== undefined && (
-            <div className="flex items-center gap-2.5 mb-3">
-              <div className="flex-1 max-w-[180px] h-1.5 bg-white/[0.07] rounded-full overflow-hidden">
-                <div
-                  className={`h-full rounded-full transition-all ${type.bar}`}
-                  style={{ width: `${nl.openRate}%` }}
-                />
-              </div>
-              <span className={`text-xs font-semibold ${type.text}`}>
-                {nl.openRate}% open rate
-              </span>
-            </div>
-          )}
-
-          {/* Topics */}
+          {/* Topics row */}
           <div className="flex flex-wrap gap-1.5">
             {nl.topics.map((t) => (
-              <span key={t} className="text-[10px] bg-white/[0.05] text-white/35 px-2 py-0.5 rounded-md">
+              <span key={t} className="text-[11px] bg-white/[0.06] text-white/40 px-2.5 py-0.5 rounded-full">
                 {t}
               </span>
             ))}
           </div>
         </div>
 
-        {/* Actions */}
-        <div className="flex items-center gap-1 shrink-0">
-          <button className="p-2 text-white/30 hover:text-white/70 hover:bg-white/[0.06] rounded-lg transition-colors" title="Preview">
-            <Eye className="w-3.5 h-3.5" />
-          </button>
-          <button className="p-2 text-white/30 hover:text-white/70 hover:bg-white/[0.06] rounded-lg transition-colors" title="Duplicate">
-            <Copy className="w-3.5 h-3.5" />
-          </button>
-          <button onClick={onEdit} className="p-2 text-white/30 hover:text-white/70 hover:bg-white/[0.06] rounded-lg transition-colors" title="Edit">
-            <Edit3 className="w-3.5 h-3.5" />
-          </button>
+        {/* Right section: open rate bar */}
+        <div className="w-48 shrink-0">
+          {nl.openRate !== undefined ? (
+            <div>
+              <div className="text-[11px] uppercase tracking-[0.07em] text-white/30 mb-2">Open Rate</div>
+              <div className="bg-white/[0.07] rounded-full h-1.5 overflow-hidden mb-1.5">
+                <div
+                  className="bg-emerald-500 h-full rounded-full transition-all"
+                  style={{ width: `${nl.openRate}%` }}
+                />
+              </div>
+              <div className="text-[13px] font-semibold text-white/70">{nl.openRate}%</div>
+            </div>
+          ) : (
+            <div className="flex items-center justify-end gap-1">
+              <button
+                className="p-2 text-white/25 hover:text-white/60 hover:bg-white/[0.06] rounded-lg transition-colors"
+                title="Preview"
+              >
+                <Eye className="w-3.5 h-3.5" />
+              </button>
+              <button
+                className="p-2 text-white/25 hover:text-white/60 hover:bg-white/[0.06] rounded-lg transition-colors"
+                title="Duplicate"
+              >
+                <Copy className="w-3.5 h-3.5" />
+              </button>
+              <button
+                onClick={onEdit}
+                className="p-2 text-white/25 hover:text-white/60 hover:bg-white/[0.06] rounded-lg transition-colors"
+                title="Edit"
+              >
+                <Edit3 className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          )}
+          {nl.openRate !== undefined && (
+            <div className="flex items-center justify-end gap-1 mt-3">
+              <button
+                className="p-2 text-white/25 hover:text-white/60 hover:bg-white/[0.06] rounded-lg transition-colors"
+                title="Preview"
+              >
+                <Eye className="w-3.5 h-3.5" />
+              </button>
+              <button
+                className="p-2 text-white/25 hover:text-white/60 hover:bg-white/[0.06] rounded-lg transition-colors"
+                title="Duplicate"
+              >
+                <Copy className="w-3.5 h-3.5" />
+              </button>
+              <button
+                onClick={onEdit}
+                className="p-2 text-white/25 hover:text-white/60 hover:bg-white/[0.06] rounded-lg transition-colors"
+                title="Edit"
+              >
+                <Edit3 className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -312,181 +453,46 @@ function NewsletterRow({ nl, onEdit }: { nl: Newsletter; onEdit: () => void }) {
 function BlueprintCard({ bp, onUse }: { bp: Blueprint; onUse: (bp: Blueprint) => void }) {
   const c = BLUEPRINT_COLORS[bp.color];
   const Icon = bp.icon;
+
   return (
-    <div className="bg-white/[0.03] border border-white/[0.06] rounded-xl overflow-hidden hover:border-white/[0.10] transition-colors">
-      {/* Header */}
-      <div className="px-5 py-4 border-b border-white/[0.06]">
-        <div className="flex items-center gap-3 mb-1.5">
-          <div className={`w-8 h-8 rounded-lg bg-white/[0.06] flex items-center justify-center ${c.accent}`}>
-            <Icon className="w-4 h-4" />
-          </div>
-          <h3 className={`font-bold text-sm ${c.accent}`}>{bp.name}</h3>
+    <div
+      className={`bg-white/[0.025] border border-white/[0.06] rounded-2xl p-5 cursor-pointer hover:bg-white/[0.04] ${c.hoverBorder} transition-all`}
+    >
+      {/* Top: icon + title */}
+      <div className="flex items-center gap-3 mb-1">
+        <div className={`w-10 h-10 rounded-xl ${c.iconBg} border ${c.iconBorder} flex items-center justify-center shrink-0`}>
+          <Icon className={`w-4 h-4 ${c.accent}`} />
         </div>
-        <div className="grid grid-cols-2 gap-x-4 gap-y-2 mt-3">
-          <div>
-            <div className="text-[10px] uppercase tracking-widest text-white/25 font-semibold mb-1">Audience</div>
-            <div className="text-xs text-white/60 leading-tight">{bp.audience}</div>
-          </div>
-          <div>
-            <div className="text-[10px] uppercase tracking-widest text-white/25 font-semibold mb-1">Cadence</div>
-            <div className={`text-xs font-semibold ${c.accent}`}>{bp.cadence}</div>
-          </div>
+        <div>
+          <h3 className={`text-[15px] font-semibold text-white/90`}>{bp.name}</h3>
+          <div className="text-[12px] text-white/50 mt-0.5">{bp.audience}</div>
         </div>
       </div>
 
-      {/* Body */}
-      <div className="p-5">
-        <div className="text-[10px] uppercase tracking-widest text-white/25 font-semibold mb-2.5">Sections</div>
-        <ul className="space-y-2 mb-5">
-          {bp.sections.map((s) => (
-            <li key={s} className="flex items-start gap-2 text-xs text-white/50">
-              <div className={`w-1.5 h-1.5 rounded-full ${c.dot} shrink-0 mt-1`} />
-              {s}
-            </li>
-          ))}
-        </ul>
-        <button
-          onClick={() => onUse(bp)}
-          className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-lg text-xs font-semibold transition-colors ${c.btn}`}
-        >
-          Use Blueprint
-          <ArrowRight className="w-3.5 h-3.5" />
-        </button>
+      {/* Frequency chip */}
+      <div className="mt-3">
+        <span className="text-[11px] bg-white/[0.06] rounded-full px-2.5 py-0.5 text-white/40">
+          {bp.cadence}
+        </span>
       </div>
-    </div>
-  );
-}
 
-// ─── Composer Guide Tab ───────────────────────────────────────
-function ComposerGuide() {
-  return (
-    <div className="max-w-3xl space-y-6">
-      {/* Know Your Audience */}
-      <section className="bg-white/[0.03] border border-white/[0.06] rounded-xl overflow-hidden">
-        <div className="px-5 py-4 border-b border-white/[0.06] flex items-center gap-2.5">
-          <Users className="w-4 h-4 text-blue-400" />
-          <h3 className="font-bold text-white text-sm">Know Your Audience</h3>
-        </div>
-        <div className="p-5 overflow-x-auto">
-          <table className="w-full text-xs">
-            <thead>
-              <tr className="text-white/30 text-[10px] uppercase tracking-widest">
-                <th className="text-left pb-3 pr-4 font-semibold">Segment</th>
-                <th className="text-left pb-3 pr-4 font-semibold">Tone</th>
-                <th className="text-left pb-3 pr-4 font-semibold">Key Topics</th>
-                <th className="text-left pb-3 font-semibold">Timing</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-white/[0.04]">
-              {[
-                { seg: "Drivers", tone: "Simple, direct, mobile-first", topics: "Safety, HOS, pay, route alerts", time: "Bi-weekly Fri 4 PM" },
-                { seg: "Dispatchers & Ops", tone: "Data-driven, action-oriented", topics: "KPIs, loads, route changes, priorities", time: "Every Mon 7:30 AM" },
-                { seg: "Finance & Leadership", tone: "Analytical, concise", topics: "Revenue, invoicing, cost, forecast", time: "Monthly 1st Tue" },
-                { seg: "All Team", tone: "Warm, celebratory", topics: "Milestones, new hires, recognition, OKRs", time: "Quarterly" },
-              ].map((r) => (
-                <tr key={r.seg}>
-                  <td className="py-2.5 pr-4 font-semibold text-white/70">{r.seg}</td>
-                  <td className="py-2.5 pr-4 text-white/45">{r.tone}</td>
-                  <td className="py-2.5 pr-4 text-white/45">{r.topics}</td>
-                  <td className="py-2.5 text-white/45">{r.time}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </section>
+      {/* Sections list */}
+      <ul className="mt-4 space-y-2">
+        {bp.sections.map((s) => (
+          <li key={s} className="flex items-center gap-2 text-[12px] text-white/45">
+            <div className={`w-1 h-1 rounded-full ${c.dot} shrink-0`} />
+            {s}
+          </li>
+        ))}
+      </ul>
 
-      {/* Subject Line Formula */}
-      <section className="bg-white/[0.03] border border-white/[0.06] rounded-xl overflow-hidden">
-        <div className="px-5 py-4 border-b border-white/[0.06] flex items-center gap-2.5">
-          <FileText className="w-4 h-4 text-amber-400" />
-          <h3 className="font-bold text-white text-sm">Subject Line Formula</h3>
-        </div>
-        <div className="p-5 space-y-3">
-          {[
-            { type: "Weekly Ops",    color: "blue-400",    ex: "[Weekly Ops] Feb 18 — Fleet KPIs, Load Highlights + Action Items" },
-            { type: "Driver Bulletin", color: "amber-400", ex: "[Driver Bulletin] Winter Weather Safety + Payroll Update — Fri Feb 14" },
-            { type: "Finance Brief",  color: "emerald-400", ex: "[Finance] January Close — Revenue $2.91/mi · 7 invoices aging · Q1 forecast" },
-            { type: "Company-Wide",   color: "violet-400", ex: "[Hemut Update] Q1 Kickoff Recap · 3 New Hires · Zero Incidents in January" },
-          ].map((item) => (
-            <div key={item.type} className="flex items-start gap-3">
-              <span className={`text-[10px] font-bold text-${item.color} shrink-0 mt-0.5 w-28`}>{item.type}</span>
-              <code className="text-xs text-white/50 font-mono leading-relaxed">{item.ex}</code>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Message Structure */}
-      <section className="bg-white/[0.03] border border-white/[0.06] rounded-xl overflow-hidden">
-        <div className="px-5 py-4 border-b border-white/[0.06] flex items-center gap-2.5">
-          <BookOpen className="w-4 h-4 text-violet-400" />
-          <h3 className="font-bold text-white text-sm">Message Structure</h3>
-        </div>
-        <div className="p-5">
-          <div className="flex items-stretch gap-0">
-            {[
-              { step: "1", label: "Opening Hook", desc: "One sentence — most urgent or impressive stat. Sets the tone immediately.", color: "bg-blue-400" },
-              { step: "2", label: "Key Info", desc: "Data-backed sections. Use bullet points, not paragraphs. Visuals over text.", color: "bg-amber-400" },
-              { step: "3", label: "Action Items", desc: "Numbered list of specific things the reader must do. Clear owner + deadline.", color: "bg-emerald-400" },
-              { step: "4", label: "Closing", desc: "One warm sentence + open door. \"Questions? Reply directly.\"", color: "bg-violet-400" },
-            ].map((s, i, arr) => (
-              <div key={s.step} className={`flex-1 ${i < arr.length - 1 ? "border-r border-white/[0.06]" : ""} p-4`}>
-                <div className={`w-6 h-6 rounded-full ${s.color} flex items-center justify-center text-white text-[10px] font-bold mb-2.5`}>{s.step}</div>
-                <div className="text-xs font-semibold text-white/70 mb-1.5">{s.label}</div>
-                <div className="text-[11px] text-white/35 leading-relaxed">{s.desc}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Open Rate Tips */}
-      <section className="bg-white/[0.03] border border-white/[0.06] rounded-xl overflow-hidden">
-        <div className="px-5 py-4 border-b border-white/[0.06] flex items-center gap-2.5">
-          <TrendingUp className="w-4 h-4 text-emerald-400" />
-          <h3 className="font-bold text-white text-sm">Open Rate Tips</h3>
-        </div>
-        <ul className="p-5 space-y-3">
-          {[
-            "Send at the right time — use the pre-configured cadence for each audience type",
-            "Mention a specific number or name in the subject line (e.g., \"$2.91/mi\" or \"T. Patel recognized\")",
-            "Keep subject lines under 60 characters — most drivers read on mobile",
-            "Driver Bulletin: Friday afternoon wins. Ops: Monday before 8 AM wins",
-            "Consistency matters more than perfection — same day, same time builds habitual opens",
-          ].map((tip, i) => (
-            <li key={i} className="flex items-start gap-3 text-xs text-white/50">
-              <div className="w-5 h-5 rounded-full bg-emerald-400/15 text-emerald-400 flex items-center justify-center text-[10px] font-bold shrink-0">{i + 1}</div>
-              {tip}
-            </li>
-          ))}
-        </ul>
-      </section>
-
-      {/* DOT Compliance Notes */}
-      <section className="bg-white/[0.03] border border-white/[0.06] rounded-xl overflow-hidden">
-        <div className="px-5 py-4 border-b border-white/[0.06] flex items-center gap-2.5">
-          <Shield className="w-4 h-4 text-red-400" />
-          <h3 className="font-bold text-white text-sm">DOT Compliance Notes</h3>
-        </div>
-        <div className="p-5 space-y-3">
-          <p className="text-xs text-white/40 leading-relaxed">Any safety-related communications sent to drivers must be documented. The following items are required when publishing a Driver Bulletin that includes regulatory content:</p>
-          <ul className="space-y-2.5">
-            {[
-              "HOS reminders must cite the specific 49 CFR Part 395 rule referenced",
-              "Weather & road condition alerts must include the source (NOAA, state DOT, or verified carrier reports)",
-              "ELD update notices must specify firmware version number and deadline for compliance",
-              "All safety policy changes sent to drivers must be countersigned in driver files within 14 days",
-              "Retain proof of delivery (email open/read receipts or driver acknowledgment) for FMCSA audit readiness",
-            ].map((item, i) => (
-              <li key={i} className="flex items-start gap-2.5 text-xs text-white/50">
-                <AlertCircle className="w-3.5 h-3.5 text-red-400/70 shrink-0 mt-0.5" />
-                {item}
-              </li>
-            ))}
-          </ul>
-        </div>
-      </section>
+      {/* Use Blueprint button */}
+      <button
+        onClick={() => onUse(bp)}
+        className={`mt-6 text-[13px] font-medium transition-colors ${c.btn}`}
+      >
+        Use Blueprint →
+      </button>
     </div>
   );
 }
@@ -501,12 +507,47 @@ function ComposeModal({
   onChange: (patch: Partial<ComposeState>) => void;
   onClose: () => void;
 }) {
-  const selectedBlueprintData = BLUEPRINTS.find((b) => b.id === state.blueprint);
+  const [aiDrafting, setAiDrafting] = useState(false);
+
+  const draftKey = state.blueprint || state.type || "";
+  const hasDraft = draftKey !== "" && getDraft(draftKey) !== "";
+
+  const handleAiDraft = async () => {
+    if (!hasDraft || aiDrafting) return;
+    setAiDrafting(true);
+    try {
+      const selectedBp = BLUEPRINTS.find((b) => b.id === state.blueprint);
+      const res = await fetch("/api/ai", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: "draft",
+          context: {
+            newsletterType: state.type || state.blueprint || "weekly-ops",
+            audience: selectedBp?.audience ?? "All Team",
+            sections: selectedBp?.sections.join(", ") ?? "Fleet KPIs, Action items",
+          },
+        }),
+      });
+      const data = await res.json();
+      if (data.text) {
+        onChange({ body: data.text });
+      } else {
+        onChange({ body: getDraft(draftKey) });
+      }
+    } catch {
+      onChange({ body: getDraft(draftKey) });
+    } finally {
+      setAiDrafting(false);
+    }
+  };
 
   const handleBlueprintSelect = (bpId: string) => {
     const bp = BLUEPRINTS.find((b) => b.id === bpId);
     if (bp) {
-      const recipientLabel = RECIPIENT_OPTIONS.find((r) => r.includes(bp.audience.split(" ")[1] ?? "")) ?? `${bp.audience} (${bp.audienceCount})`;
+      const recipientLabel =
+        RECIPIENT_OPTIONS.find((r) => r.includes(bp.audience.split(" ")[1] ?? "")) ??
+        `${bp.audience} (${bp.audienceCount})`;
       onChange({
         blueprint: bpId,
         type: bp.type,
@@ -519,93 +560,109 @@ function ComposeModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      {/* Overlay click to close */}
+      <div
+        role="button"
+        tabIndex={0}
+        aria-label="Close modal"
+        className="absolute inset-0"
+        onClick={onClose}
+        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onClose(); }}
+      />
 
       {/* Modal */}
-      <div className="relative w-full max-w-2xl bg-[#0d1424] border border-white/[0.08] rounded-2xl shadow-2xl shadow-black/60 flex flex-col max-h-[90vh]">
+      <div className="relative bg-[#0a1020] border border-white/[0.1] rounded-2xl w-full max-w-lg p-7 max-h-[90vh] overflow-y-auto shadow-[0_20px_60px_rgba(0,0,0,0.6)]">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.06]">
-          <div className="flex items-center gap-2.5">
-            <Mail className="w-4 h-4 text-amber-400" />
-            <h2 className="font-bold text-white">Create Newsletter</h2>
-          </div>
-          <button onClick={onClose} className="p-1.5 text-white/40 hover:text-white hover:bg-white/[0.06] rounded-lg transition-colors">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-[19px] font-bold text-white">New Newsletter</h2>
+          <button
+            onClick={onClose}
+            className="p-1.5 text-white/35 hover:text-white/70 hover:bg-white/[0.06] rounded-lg transition-colors"
+          >
             <X className="w-4 h-4" />
           </button>
         </div>
 
-        {/* Body */}
-        <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5">
-          {/* Blueprint selector */}
-          <div>
-            <label className="block text-[10px] uppercase tracking-widest text-white/35 font-semibold mb-2">Blueprint (optional — pre-fills fields)</label>
-            <div className="grid grid-cols-2 gap-2">
-              {BLUEPRINTS.map((bp) => {
-                const c = BLUEPRINT_COLORS[bp.color];
-                const Icon = bp.icon;
-                const selected = state.blueprint === bp.id;
-                return (
-                  <button
-                    key={bp.id}
-                    onClick={() => handleBlueprintSelect(selected ? "" : bp.id)}
-                    className={`flex items-center gap-2.5 px-3 py-2.5 rounded-lg border text-left transition-colors ${
-                      selected
-                        ? `${c.btn} border-current`
-                        : "bg-white/[0.03] border-white/[0.06] text-white/50 hover:bg-white/[0.05]"
-                    }`}
-                  >
-                    <Icon className={`w-3.5 h-3.5 shrink-0 ${selected ? c.accent : "text-white/30"}`} />
-                    <span className="text-xs font-medium">{bp.name}</span>
-                  </button>
-                );
-              })}
-            </div>
+        {/* Blueprint selector */}
+        <div className="mb-5">
+          <div className="text-[11px] font-bold uppercase tracking-[0.1em] text-white/25 mb-2">
+            Blueprint — optional, pre-fills fields
           </div>
+          <div className="grid grid-cols-2 gap-2">
+            {BLUEPRINTS.map((bp) => {
+              const Icon = bp.icon;
+              const selected = state.blueprint === bp.id;
+              const selectedCls = MODAL_BLUEPRINT_SELECTED[bp.color] ?? "bg-amber-500/10 border-amber-500/30 text-amber-300";
+              return (
+                <button
+                  key={bp.id}
+                  onClick={() => handleBlueprintSelect(selected ? "" : bp.id)}
+                  className={`flex items-center gap-2 rounded-xl p-3 border text-[12px] text-left transition-colors ${
+                    selected
+                      ? selectedCls
+                      : "bg-white/[0.03] border-white/[0.07] text-white/50 hover:bg-white/[0.06]"
+                  }`}
+                >
+                  <Icon className="w-3.5 h-3.5 shrink-0" />
+                  <span className="font-medium">{bp.name}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
 
+        {/* Form fields */}
+        <div className="space-y-5">
           {/* Title */}
           <div>
-            <label className="block text-[10px] uppercase tracking-widest text-white/35 font-semibold mb-2">Title</label>
+            <label htmlFor="compose-title" className="text-[12px] font-semibold text-white/45 mb-1.5 block">Title</label>
             <input
+              id="compose-title"
               type="text"
               value={state.title}
               onChange={(e) => onChange({ title: e.target.value })}
               placeholder="e.g. Weekly Ops Digest — Week of Feb 25"
-              className="w-full bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2.5 text-sm text-white placeholder-white/25 focus:outline-none focus:border-amber-400/50 transition-colors"
+              className="bg-white/[0.04] border border-white/[0.08] rounded-xl px-3.5 py-2.5 text-[13px] text-white/80 placeholder:text-white/20 focus:outline-none focus:border-amber-500/40 focus:ring-1 focus:ring-amber-500/20 w-full"
             />
           </div>
 
           {/* Type */}
           <div>
-            <label className="block text-[10px] uppercase tracking-widest text-white/35 font-semibold mb-2">Type</label>
+            <label htmlFor="compose-type" className="text-[12px] font-semibold text-white/45 mb-1.5 block">Type</label>
             <div className="relative">
               <select
+                id="compose-type"
                 value={state.type}
                 onChange={(e) => onChange({ type: e.target.value as NewsletterType | "" })}
-                className="w-full appearance-none bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-amber-400/50 transition-colors"
+                className="bg-white/[0.04] border border-white/[0.08] rounded-xl px-3.5 py-2.5 text-[13px] text-white/80 focus:outline-none focus:border-amber-500/40 focus:ring-1 focus:ring-amber-500/20 w-full appearance-none"
               >
-                <option value="" className="bg-[#0d1424]">Select type...</option>
-                <option value="weekly-ops" className="bg-[#0d1424]">Weekly Ops Digest</option>
-                <option value="driver-bulletin" className="bg-[#0d1424]">Driver Bulletin</option>
-                <option value="finance-brief" className="bg-[#0d1424]">Finance Brief</option>
-                <option value="company-wide" className="bg-[#0d1424]">Company-Wide Update</option>
+                <option value="" className="bg-[#0c1525]">Select type...</option>
+                <option value="weekly-ops" className="bg-[#0c1525]">Weekly Ops Digest</option>
+                <option value="driver-bulletin" className="bg-[#0c1525]">Driver Bulletin</option>
+                <option value="finance-brief" className="bg-[#0c1525]">Finance Brief</option>
+                <option value="company-wide" className="bg-[#0c1525]">Company-Wide Update</option>
               </select>
-              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white/30 pointer-events-none" />
+              <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white/30 pointer-events-none" />
             </div>
           </div>
 
           {/* Recipients */}
           <div>
-            <label className="block text-[10px] uppercase tracking-widest text-white/35 font-semibold mb-2">Recipients</label>
-            <div className="space-y-1.5">
+            <p className="text-[12px] font-semibold text-white/45 mb-1.5 block">Recipients</p>
+            <div className="space-y-2">
               {RECIPIENT_OPTIONS.map((opt) => {
                 const checked = state.recipients.includes(opt);
                 return (
                   <label key={opt} className="flex items-center gap-2.5 cursor-pointer group">
                     <div
-                      className={`w-4 h-4 rounded border transition-colors flex items-center justify-center ${
-                        checked ? "bg-amber-400 border-amber-400" : "bg-white/[0.04] border-white/[0.10] group-hover:border-white/25"
+                      role="checkbox"
+                      aria-checked={checked}
+                      tabIndex={0}
+                      className={`w-4 h-4 rounded border transition-colors flex items-center justify-center shrink-0 ${
+                        checked
+                          ? "bg-amber-500 border-amber-500"
+                          : "bg-white/[0.04] border-white/[0.10] group-hover:border-white/25"
                       }`}
                       onClick={() => {
                         const next = checked
@@ -613,28 +670,37 @@ function ComposeModal({
                           : [...state.recipients, opt];
                         onChange({ recipients: next });
                       }}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          const next = checked
+                            ? state.recipients.filter((r) => r !== opt)
+                            : [...state.recipients, opt];
+                          onChange({ recipients: next });
+                        }
+                      }}
                     >
-                      {checked && <CheckCircle2 className="w-2.5 h-2.5 text-black" />}
+                      {checked && <CheckCircle2 className="w-2.5 h-2.5 text-[#080d1a]" />}
                     </div>
-                    <span className="text-xs text-white/55">{opt}</span>
+                    <span className="text-[13px] text-white/55">{opt}</span>
                   </label>
                 );
               })}
             </div>
           </div>
 
-          {/* Schedule */}
+          {/* Send time */}
           <div>
-            <label className="block text-[10px] uppercase tracking-widest text-white/35 font-semibold mb-2">Send Time</label>
+            <p className="text-[12px] font-semibold text-white/45 mb-1.5 block">Send Time</p>
             <div className="flex gap-2 mb-3">
               {(["now", "schedule"] as const).map((opt) => (
                 <button
                   key={opt}
                   onClick={() => onChange({ scheduleNow: opt === "now" })}
-                  className={`flex-1 py-2 rounded-lg text-xs font-medium border transition-colors ${
+                  className={`flex-1 py-2 rounded-xl text-[13px] font-medium border transition-colors ${
                     (opt === "now") === state.scheduleNow
-                      ? "bg-amber-400/15 border-amber-400/30 text-amber-400"
-                      : "bg-white/[0.03] border-white/[0.06] text-white/40 hover:bg-white/[0.05]"
+                      ? "bg-amber-500/10 border-amber-500/20 text-amber-400"
+                      : "bg-white/[0.03] border-white/[0.07] text-white/40 hover:bg-white/[0.06]"
                   }`}
                 >
                   {opt === "now" ? "Send Now" : "Schedule"}
@@ -647,60 +713,82 @@ function ComposeModal({
                   type="date"
                   value={state.scheduleDate}
                   onChange={(e) => onChange({ scheduleDate: e.target.value })}
-                  className="bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-amber-400/50 transition-colors"
+                  className="bg-white/[0.04] border border-white/[0.08] rounded-xl px-3.5 py-2.5 text-[13px] text-white/80 focus:outline-none focus:border-amber-500/40 focus:ring-1 focus:ring-amber-500/20"
                 />
                 <input
                   type="time"
                   value={state.scheduleTime}
                   onChange={(e) => onChange({ scheduleTime: e.target.value })}
-                  className="bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-amber-400/50 transition-colors"
+                  className="bg-white/[0.04] border border-white/[0.08] rounded-xl px-3.5 py-2.5 text-[13px] text-white/80 focus:outline-none focus:border-amber-500/40 focus:ring-1 focus:ring-amber-500/20"
                 />
               </div>
             )}
           </div>
 
-          {/* Body */}
+          {/* Message */}
           <div>
-            <div className="flex items-center justify-between mb-2">
-              <label className="block text-[10px] uppercase tracking-widest text-white/35 font-semibold">Message</label>
-              {selectedBlueprintData && (
-                <span className="text-[10px] text-amber-400/70 font-medium">Blueprint sections pre-filled</span>
+            <label htmlFor="compose-body" className="text-[12px] font-semibold text-white/45 mb-1.5 block">Message</label>
+            <button
+              onClick={handleAiDraft}
+              disabled={aiDrafting || !hasDraft}
+              title={!hasDraft ? "Select a blueprint to generate draft" : "Generate AI draft"}
+              className={`mt-2 mb-3 flex items-center justify-center gap-2 w-full bg-amber-500/10 hover:bg-amber-500/15 border border-amber-500/20 text-amber-400 text-[13px] font-medium rounded-xl py-2.5 transition-colors ${
+                !hasDraft ? "opacity-40 cursor-not-allowed" : "cursor-pointer"
+              }`}
+            >
+              {aiDrafting ? (
+                <>
+                  <svg
+                    className="w-3.5 h-3.5 animate-spin"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                    />
+                  </svg>
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-3.5 h-3.5" />
+                  AI Draft
+                </>
               )}
-            </div>
+            </button>
             <textarea
+              id="compose-body"
               value={state.body}
               onChange={(e) => onChange({ body: e.target.value })}
               placeholder="Write your newsletter content here. Use ## for section headers, **bold** for emphasis, and - for bullet points."
-              rows={8}
-              className="w-full bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2.5 text-sm text-white placeholder-white/25 focus:outline-none focus:border-amber-400/50 transition-colors resize-none font-mono"
+              className={`bg-white/[0.04] border border-white/[0.08] rounded-xl px-3.5 py-2.5 text-[13px] text-white/80 placeholder:text-white/20 focus:outline-none focus:border-amber-500/40 focus:ring-1 focus:ring-amber-500/20 w-full min-h-[120px] resize-none font-mono ${
+                aiDrafting ? "opacity-50" : ""
+              }`}
             />
-            <div className="flex gap-3 mt-1.5 text-[10px] text-white/25">
+            <div className="flex gap-3 mt-1.5 text-[12px] text-white/40">
               <span>## Section header</span>
               <span>**bold**</span>
               <span>- bullet</span>
-              <span>[link](url)</span>
             </div>
           </div>
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t border-white/[0.06] flex items-center justify-between gap-3">
+        <div className="mt-6 flex gap-3 justify-end">
           <button
             onClick={onClose}
-            className="text-sm text-white/40 hover:text-white/60 transition-colors px-3 py-2"
+            className="bg-white/[0.05] hover:bg-white/[0.08] text-white/65 hover:text-white/85 text-[13px] px-4 py-2 rounded-xl border border-white/[0.08] transition-colors"
           >
             Cancel
           </button>
-          <div className="flex items-center gap-2">
-            <button className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-white/[0.06] hover:bg-white/[0.10] text-white/60 text-sm font-medium transition-colors border border-white/[0.08]">
-              <Eye className="w-3.5 h-3.5" />
-              Preview
-            </button>
-            <button className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-black text-sm font-bold transition-colors shadow-lg shadow-amber-500/20">
-              <Send className="w-3.5 h-3.5" />
-              {state.scheduleNow ? "Send Now" : "Schedule"}
-            </button>
-          </div>
+          <button className="bg-amber-500 hover:bg-amber-400 text-[#080d1a] font-semibold text-[13px] px-4 py-2 rounded-xl transition-colors flex items-center gap-2">
+            <Send className="w-3.5 h-3.5" />
+            {state.scheduleNow ? "Send Now" : "Schedule"}
+          </button>
         </div>
       </div>
     </div>
@@ -750,48 +838,47 @@ export function NewsletterClient() {
   };
 
   const TABS: { key: ActiveTab; label: string }[] = [
-    { key: "newsletters", label: "All Newsletters" },
+    { key: "newsletters", label: "Newsletters" },
     { key: "blueprints",  label: "Blueprints" },
-    { key: "guide",       label: "Composer Guide" },
   ];
 
   return (
-    <div className="min-h-screen bg-[#080d1a] p-6">
-      {/* Header */}
-      <div className="flex items-start justify-between mb-7">
+    <div className="px-10 pt-8 pb-10">
+      {/* Page header */}
+      <div className="flex items-start justify-between pb-6 mb-8 border-b border-white/[0.06]">
         <div>
-          <h1 className="text-xl font-bold text-white">Newsletter System</h1>
-          <p className="text-sm text-white/35 mt-1">
-            Structured communications for every team segment — drivers, ops, finance, and leadership
+          <h1 className="text-[28px] font-bold tracking-tight text-white">Newsletter</h1>
+          <p className="text-[14px] text-white/40 mt-2.5 leading-relaxed">
+            Create and distribute structured bulletins across your operations team.
           </p>
         </div>
         <button
           onClick={() => openCompose()}
-          className="flex items-center gap-2 bg-amber-500 hover:bg-amber-400 text-black px-4 py-2 rounded-lg text-sm font-bold transition-colors shadow-lg shadow-amber-500/20"
+          className="bg-amber-500 hover:bg-amber-400 text-[#080d1a] font-semibold text-[13px] px-5 py-2.5 rounded-xl transition-colors flex items-center gap-2"
         >
           <Plus className="w-4 h-4" />
           Create Newsletter
         </button>
       </div>
 
-      {/* KPI Cards */}
-      <div className="grid grid-cols-4 gap-4 mb-7">
-        <KpiCard label="Sent This Month"   value="6"    icon={Send}       iconClass="text-blue-400" />
-        <KpiCard label="Total Recipients"  value="104"  icon={Users}      iconClass="text-amber-400" />
-        <KpiCard label="Avg Open Rate"     value="86%"  icon={TrendingUp} iconClass="text-emerald-400" />
-        <KpiCard label="Scheduled"         value="2"    icon={Calendar}   iconClass="text-violet-400" />
+      {/* KPI strip */}
+      <div className="grid grid-cols-4 gap-4 mb-8">
+        <KpiCard label="Sent This Month"  value="6"    subtitle="newsletters"     icon={Send} />
+        <KpiCard label="Total Recipients" value="104"  subtitle="team members"    icon={Users} />
+        <KpiCard label="Avg Open Rate"    value="86%"  subtitle="last 30 days"    icon={TrendingUp} />
+        <KpiCard label="Scheduled"        value="2"    subtitle="upcoming sends"  icon={Calendar} />
       </div>
 
-      {/* Tabs */}
-      <div className="flex gap-1 bg-white/[0.04] border border-white/[0.06] rounded-xl p-1 w-fit mb-6">
+      {/* Tab bar */}
+      <div className="bg-white/[0.04] border border-white/[0.06] rounded-xl p-1.5 flex gap-1 w-fit mb-6">
         {TABS.map((tab) => (
           <button
             key={tab.key}
             onClick={() => setActiveTab(tab.key)}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+            className={`text-[13px] px-5 py-2 rounded-lg transition-colors ${
               activeTab === tab.key
-                ? "bg-white/[0.08] text-white shadow-sm"
-                : "text-white/40 hover:text-white/60"
+                ? "bg-white/[0.09] text-white font-semibold"
+                : "text-white/40 hover:text-white/65"
             }`}
           >
             {tab.label}
@@ -799,9 +886,9 @@ export function NewsletterClient() {
         ))}
       </div>
 
-      {/* Tab: All Newsletters */}
+      {/* Tab: Newsletters */}
       {activeTab === "newsletters" && (
-        <div className="space-y-3">
+        <div>
           {NEWSLETTERS.map((nl) => (
             <NewsletterRow
               key={nl.id}
@@ -814,15 +901,12 @@ export function NewsletterClient() {
 
       {/* Tab: Blueprints */}
       {activeTab === "blueprints" && (
-        <div className="grid grid-cols-2 gap-5">
+        <div className="grid grid-cols-2 gap-6">
           {BLUEPRINTS.map((bp) => (
             <BlueprintCard key={bp.id} bp={bp} onUse={handleBlueprintUse} />
           ))}
         </div>
       )}
-
-      {/* Tab: Composer Guide */}
-      {activeTab === "guide" && <ComposerGuide />}
 
       {/* Compose Modal */}
       {compose.open && (
