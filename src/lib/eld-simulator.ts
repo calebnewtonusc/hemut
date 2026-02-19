@@ -7,9 +7,9 @@
  * Used when Samsara API is unavailable or in sandbox mode.
  */
 
-export type DutyStatus = "DRIVING" | "ON_DUTY" | "OFF_DUTY" | "SLEEPER_BED";
+type DutyStatus = "DRIVING" | "ON_DUTY" | "OFF_DUTY" | "SLEEPER_BED";
 
-export interface HOSState {
+interface HOSState {
   driverId: string;
   dutyStatus: DutyStatus;
   drivingMinutes: number;   // minutes driven today
@@ -19,7 +19,7 @@ export interface HOSState {
   shiftStartMs: number;     // timestamp when current shift started
 }
 
-export interface HOSAnalysis {
+interface HOSAnalysis {
   driverId: string;
   remainingDrivingMins: number;   // max 660 (11 hours)
   remainingOnDutyMins: number;    // max 840 (14 hours)
@@ -31,7 +31,7 @@ export interface HOSAnalysis {
   nextResetMs: number;            // when 34-hour restart completes
 }
 
-export interface HOSViolation {
+interface HOSViolation {
   type: "11_HOUR" | "14_HOUR" | "30_MIN_BREAK" | "60_70_CYCLE";
   description: string;
   severity: "WARNING" | "VIOLATION";

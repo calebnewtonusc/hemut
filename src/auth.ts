@@ -4,7 +4,7 @@ import { authConfig } from "@/auth.config";
 import { prisma } from "@/lib/db";
 import bcrypt from "bcryptjs";
 
-export const { handlers, signIn, signOut, auth } = NextAuth({
+export const { handlers, auth } = NextAuth({
   ...authConfig,
   providers: [
     Credentials({

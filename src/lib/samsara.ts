@@ -7,7 +7,7 @@
  * Docs: https://developers.samsara.com/reference
  */
 
-export interface SamsaraVehicleLocation {
+interface SamsaraVehicleLocation {
   id: string;
   name: string;
   latitude: number;
@@ -18,7 +18,7 @@ export interface SamsaraVehicleLocation {
   reverseGeo?: { formattedLocation: string };
 }
 
-export interface SamsaraHOSLog {
+interface SamsaraHOSLog {
   driverId: string;
   driverName: string;
   dutyStatus: "DRIVING" | "ON_DUTY" | "SLEEPER_BED" | "OFF_DUTY" | "PERSONAL_CONVEYANCE" | "YARD_MOVES";
@@ -33,7 +33,7 @@ export interface SamsaraHOSLog {
   };
 }
 
-export interface SamsaraDriverStatus {
+interface SamsaraDriverStatus {
   driverId: string;
   currentDutyStatus: string;
   hosRemaining: number; // minutes
@@ -64,7 +64,7 @@ const SIMULATED_HOS: SamsaraHOSLog[] = [
 
 // ─── API Client ────────────────────────────────────────────────────────────────
 
-export class SamsaraClient {
+class SamsaraClient {
   private apiKey: string | undefined;
   private sandboxMode: boolean;
 

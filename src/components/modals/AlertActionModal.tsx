@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useReducer, useEffect } from "react";
 import { X, AlertTriangle, Check, MessageSquare, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -32,24 +32,52 @@ const RESOLUTIONS = [
   { id: "resolve", label: "Resolve — Fixed", desc: "Issue resolved, close alert" },
 ];
 
-export function AlertActionModal({ open, onClose, alert }: Props) {
-  const [resolution, setResolution] = useState("acknowledge");
-  const [notes, setNotes] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
+// ─── Reducer ────────────────────────────────────────────────
+interface ModalState {
+  resolution: string;
+  notes: string;
+  loading: boolean;
+  success: boolean;
+}
 
+type ModalAction =
+  | { type: "SET_RESOLUTION"; value: string }
+  | { type: "SET_NOTES"; value: string }
+  | { type: "SET_LOADING"; value: boolean }
+  | { type: "SET_SUCCESS" }
+  | { type: "RESET" };
+
+const initialState: ModalState = {
+  resolution: "acknowledge",
+  notes: "",
+  loading: false,
+  success: false,
+};
+
+function modalReducer(state: ModalState, action: ModalAction): ModalState {
+  switch (action.type) {
+    case "SET_RESOLUTION": return { ...state, resolution: action.value };
+    case "SET_NOTES":      return { ...state, notes: action.value };
+    case "SET_LOADING":    return { ...state, loading: action.value };
+    case "SET_SUCCESS":    return { ...state, success: true, loading: false };
+    case "RESET":          return initialState;
+    default:               return state;
+  }
+}
+
+export function AlertActionModal({ open, onClose, alert }: Props) {
+  const [state, dispatch] = useReducer(modalReducer, initialState);
+  const { resolution, notes, loading, success } = state;
+
+  // Keyboard close
   useEffect(() => {
     function handleKey(e: KeyboardEvent) { if (e.key === "Escape") onClose(); }
     if (open) window.addEventListener("keydown", handleKey);
     return () => window.removeEventListener("keydown", handleKey);
   }, [open, onClose]);
 
-  useEffect(() => {
-    if (open) { setResolution("acknowledge"); setNotes(""); setSuccess(false); }
-  }, [open]);
-
   async function handleResolve() {
-    setLoading(true);
+    dispatch({ type: "SET_LOADING", value: true });
     try {
       if (alert?.id) {
         await fetch(`/api/alerts/${alert.id}`, {
@@ -59,9 +87,8 @@ export function AlertActionModal({ open, onClose, alert }: Props) {
         });
       }
     } catch { /* demo mode */ }
-    setSuccess(true);
+    dispatch({ type: "SET_SUCCESS" });
     setTimeout(onClose, 1400);
-    setLoading(false);
   }
 
   if (!open || !alert) return null;
@@ -71,7 +98,7 @@ export function AlertActionModal({ open, onClose, alert }: Props) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
+      <button type="button" aria-label="Close modal" className="absolute inset-0 bg-black/60 backdrop-blur-sm cursor-default" onClick={onClose} />
 
       <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
         {/* Severity bar */}
@@ -88,7 +115,7 @@ export function AlertActionModal({ open, onClose, alert }: Props) {
               </div>
             </div>
           </div>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors">
+          <button type="button" onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -125,19 +152,20 @@ export function AlertActionModal({ open, onClose, alert }: Props) {
               </div>
 
               {/* Resolution options */}
-              <div>
-                <label className="block text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-2">Resolution Action</label>
+              <div role="group" aria-label="Resolution Action">
+                <p className="block text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-2">Resolution Action</p>
                 <div className="space-y-1.5">
                   {RESOLUTIONS.filter(r => {
                     if (sev === "critical") return ["acknowledge", "reassign", "resolve"].includes(r.id);
                     if (sev === "high") return ["acknowledge", "notify", "resolve"].includes(r.id);
                     return ["acknowledge", "schedule", "resolve"].includes(r.id);
                   }).map(r => (
-                    <div
+                    <button
                       key={r.id}
-                      onClick={() => setResolution(r.id)}
+                      type="button"
+                      onClick={() => dispatch({ type: "SET_RESOLUTION", value: r.id })}
                       className={cn(
-                        "flex items-center gap-2.5 p-2.5 rounded-xl border cursor-pointer transition-all",
+                        "w-full flex items-center gap-2.5 p-2.5 rounded-xl border transition-all text-left",
                         resolution === r.id ? "border-amber-400 bg-amber-50" : "border-gray-100 hover:border-gray-200"
                       )}
                     >
@@ -148,18 +176,20 @@ export function AlertActionModal({ open, onClose, alert }: Props) {
                         <div className="text-xs font-semibold text-gray-800">{r.label}</div>
                         <div className="text-[10px] text-gray-400">{r.desc}</div>
                       </div>
-                    </div>
+                    </button>
                   ))}
                 </div>
               </div>
 
               {/* Notes */}
               <div>
-                <label className="block text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-1.5">
+                <label htmlFor="alert-notes" className="block text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-1.5">
                   <MessageSquare className="w-3 h-3 inline mr-1" />Notes (optional)
                 </label>
                 <textarea
-                  value={notes} onChange={e => setNotes(e.target.value)}
+                  id="alert-notes"
+                  value={notes}
+                  onChange={e => dispatch({ type: "SET_NOTES", value: e.target.value })}
                   rows={2}
                   className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm text-gray-700 resize-none focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-100 transition-colors placeholder-gray-300"
                   placeholder="Add context for the audit log…"
@@ -169,10 +199,11 @@ export function AlertActionModal({ open, onClose, alert }: Props) {
 
             {/* Footer */}
             <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-end gap-2">
-              <button onClick={onClose} className="px-4 py-2 text-sm font-semibold text-gray-600 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors">
+              <button type="button" onClick={onClose} className="px-4 py-2 text-sm font-semibold text-gray-600 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors">
                 Dismiss
               </button>
               <button
+                type="button"
                 onClick={handleResolve}
                 disabled={loading}
                 className="flex items-center gap-2 px-5 py-2 bg-amber-500 hover:bg-amber-600 disabled:bg-amber-300 text-white text-sm font-bold rounded-xl transition-colors shadow-sm"

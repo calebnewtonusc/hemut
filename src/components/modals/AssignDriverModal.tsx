@@ -35,15 +35,18 @@ export function AssignDriverModal({ open, onClose, loadId }: Props) {
 
   const load = loadId ? (LOAD_INFO[loadId] ?? LOAD_INFO["L-8816"]) : LOAD_INFO["L-8816"];
 
-  useEffect(() => {
-    function handleKey(e: KeyboardEvent) { if (e.key === "Escape") onClose(); }
-    if (open) window.addEventListener("keydown", handleKey);
-    return () => window.removeEventListener("keydown", handleKey);
-  }, [open, onClose]);
+  // Reset form state when modal closes
+  function handleClose() {
+    setSelected(null);
+    setSuccess(false);
+    onClose();
+  }
 
   useEffect(() => {
-    if (open) { setSelected(null); setSuccess(false); }
-  }, [open, loadId]);
+    function handleKey(e: KeyboardEvent) { if (e.key === "Escape") handleClose(); }
+    if (open) window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  }, [open]); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function handleAssign() {
     if (!selected) return;
@@ -67,7 +70,7 @@ export function AssignDriverModal({ open, onClose, loadId }: Props) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
+      <button type="button" aria-label="Close modal" className="absolute inset-0 bg-black/60 backdrop-blur-sm cursor-default" onClick={handleClose} />
 
       <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
         {/* Header */}
@@ -81,7 +84,7 @@ export function AssignDriverModal({ open, onClose, loadId }: Props) {
               <p className="text-[11px] text-gray-400">AI-ranked by HOS, location, and CSA score</p>
             </div>
           </div>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors">
+          <button onClick={handleClose} className="text-gray-400 hover:text-gray-600 transition-colors">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -117,11 +120,12 @@ export function AssignDriverModal({ open, onClose, loadId }: Props) {
             {/* Driver list */}
             <div className="px-6 py-4 space-y-2 max-h-72 overflow-y-auto">
               {AVAILABLE_DRIVERS.map((d, i) => (
-                <div
+                <button
                   key={d.id}
+                  type="button"
                   onClick={() => setSelected(d.id)}
                   className={cn(
-                    "flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all",
+                    "w-full flex items-center gap-3 p-3 rounded-xl border transition-all text-left",
                     selected === d.id
                       ? "border-blue-400 bg-blue-50"
                       : "border-gray-100 hover:border-gray-200 hover:bg-gray-50"
@@ -167,16 +171,17 @@ export function AssignDriverModal({ open, onClose, loadId }: Props) {
                   <div className="w-3.5 h-3.5 rounded-full border-2 border-gray-300 shrink-0 flex items-center justify-center">
                     {selected === d.id && <div className="w-2 h-2 rounded-full bg-blue-500" />}
                   </div>
-                </div>
+                </button>
               ))}
             </div>
 
             {/* Footer */}
             <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-end gap-2">
-              <button onClick={onClose} className="px-4 py-2 text-sm font-semibold text-gray-600 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors">
+              <button type="button" onClick={handleClose} className="px-4 py-2 text-sm font-semibold text-gray-600 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors">
                 Cancel
               </button>
               <button
+                type="button"
                 onClick={handleAssign}
                 disabled={!selected || loading}
                 className="flex items-center gap-2 px-5 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white text-sm font-bold rounded-xl transition-colors shadow-sm"

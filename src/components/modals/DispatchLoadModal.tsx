@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useReducer, useEffect } from "react";
 import { X, Truck, MapPin, Package, User, Calendar, DollarSign, Zap, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -17,16 +17,58 @@ const AVAILABLE_DRIVERS = [
 
 const COMMODITIES = ["Auto Parts", "Electronics", "Retail Goods", "Food & Bev.", "Pharma", "Chemicals", "Steel / Metal", "Lumber", "Perishables", "Industrial Equip.", "Construction", "Textiles"];
 
+// ─── Reducer ────────────────────────────────────────────────
+interface FormState {
+  origin: string;
+  dest: string;
+  customer: string;
+  commodity: string;
+  weight: string;
+  pickup: string;
+  selectedDriver: string | null;
+  loading: boolean;
+  success: boolean;
+}
+
+type FormAction =
+  | { type: "SET_FIELD"; field: keyof Pick<FormState, "origin" | "dest" | "customer" | "commodity" | "weight" | "pickup">; value: string }
+  | { type: "SELECT_DRIVER"; id: string | null }
+  | { type: "SET_LOADING"; value: boolean }
+  | { type: "SET_SUCCESS" }
+  | { type: "RESET" };
+
+const initialState: FormState = {
+  origin: "",
+  dest: "",
+  customer: "",
+  commodity: "",
+  weight: "",
+  pickup: "",
+  selectedDriver: null,
+  loading: false,
+  success: false,
+};
+
+function formReducer(state: FormState, action: FormAction): FormState {
+  switch (action.type) {
+    case "SET_FIELD":
+      return { ...state, [action.field]: action.value };
+    case "SELECT_DRIVER":
+      return { ...state, selectedDriver: action.id };
+    case "SET_LOADING":
+      return { ...state, loading: action.value };
+    case "SET_SUCCESS":
+      return { ...state, success: true, loading: false };
+    case "RESET":
+      return initialState;
+    default:
+      return state;
+  }
+}
+
 export function DispatchLoadModal({ open, onClose }: Props) {
-  const [origin, setOrigin] = useState("");
-  const [dest, setDest] = useState("");
-  const [customer, setCustomer] = useState("");
-  const [commodity, setCommodity] = useState("");
-  const [weight, setWeight] = useState("");
-  const [pickup, setPickup] = useState("");
-  const [selectedDriver, setSelectedDriver] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
+  const [state, dispatch] = useReducer(formReducer, initialState);
+  const { origin, dest, customer, commodity, weight, pickup, selectedDriver, loading, success } = state;
 
   useEffect(() => {
     function handleKey(e: KeyboardEvent) {
@@ -36,33 +78,21 @@ export function DispatchLoadModal({ open, onClose }: Props) {
     return () => window.removeEventListener("keydown", handleKey);
   }, [open, onClose]);
 
-  // Reset form when opened
-  useEffect(() => {
-    if (open) {
-      setOrigin(""); setDest(""); setCustomer(""); setCommodity("");
-      setWeight(""); setPickup(""); setSelectedDriver(null);
-      setSuccess(false);
-    }
-  }, [open]);
-
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setLoading(true);
-    // POST to API
+    dispatch({ type: "SET_LOADING", value: true });
     try {
       await fetch("/api/loads", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ origin, dest, customer, commodity, weight, eta: pickup, driverId: selectedDriver }),
       });
-      setSuccess(true);
+      dispatch({ type: "SET_SUCCESS" });
       setTimeout(onClose, 1400);
     } catch {
       // fallback: just show success in demo mode
-      setSuccess(true);
+      dispatch({ type: "SET_SUCCESS" });
       setTimeout(onClose, 1400);
-    } finally {
-      setLoading(false);
     }
   }
 
@@ -71,8 +101,10 @@ export function DispatchLoadModal({ open, onClose }: Props) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}
-      <div
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+      <button
+        type="button"
+        aria-label="Close modal"
+        className="absolute inset-0 bg-black/60 backdrop-blur-sm cursor-default"
         onClick={onClose}
       />
 
@@ -89,7 +121,7 @@ export function DispatchLoadModal({ open, onClose }: Props) {
               <p className="text-[11px] text-gray-400">Hemut AI will score and optimize this route</p>
             </div>
           </div>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors">
+          <button type="button" onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -108,21 +140,27 @@ export function DispatchLoadModal({ open, onClose }: Props) {
               {/* Route */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-1.5">
+                  <label htmlFor="dispatch-origin" className="block text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-1.5">
                     <MapPin className="w-3 h-3 inline mr-1" />Origin City
                   </label>
                   <input
-                    value={origin} onChange={e => setOrigin(e.target.value)} required
+                    id="dispatch-origin"
+                    value={origin}
+                    onChange={e => dispatch({ type: "SET_FIELD", field: "origin", value: e.target.value })}
+                    required
                     className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-100 transition-colors"
                     placeholder="Chicago, IL"
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-1.5">
+                  <label htmlFor="dispatch-dest" className="block text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-1.5">
                     <MapPin className="w-3 h-3 inline mr-1" />Destination
                   </label>
                   <input
-                    value={dest} onChange={e => setDest(e.target.value)} required
+                    id="dispatch-dest"
+                    value={dest}
+                    onChange={e => dispatch({ type: "SET_FIELD", field: "dest", value: e.target.value })}
+                    required
                     className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-100 transition-colors"
                     placeholder="Dallas, TX"
                   />
@@ -132,19 +170,23 @@ export function DispatchLoadModal({ open, onClose }: Props) {
               {/* Customer + Commodity */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-1.5">Customer</label>
+                  <label htmlFor="dispatch-customer" className="block text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-1.5">Customer</label>
                   <input
-                    value={customer} onChange={e => setCustomer(e.target.value)}
+                    id="dispatch-customer"
+                    value={customer}
+                    onChange={e => dispatch({ type: "SET_FIELD", field: "customer", value: e.target.value })}
                     className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-100 transition-colors"
                     placeholder="Walmart Distribution"
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-1.5">
+                  <label htmlFor="dispatch-commodity" className="block text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-1.5">
                     <Package className="w-3 h-3 inline mr-1" />Commodity
                   </label>
                   <select
-                    value={commodity} onChange={e => setCommodity(e.target.value)}
+                    id="dispatch-commodity"
+                    value={commodity}
+                    onChange={e => dispatch({ type: "SET_FIELD", field: "commodity", value: e.target.value })}
                     className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:border-amber-400 bg-white transition-colors"
                   >
                     <option value="">Select…</option>
@@ -156,36 +198,42 @@ export function DispatchLoadModal({ open, onClose }: Props) {
               {/* Weight + Pickup */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-1.5">Weight (lbs)</label>
+                  <label htmlFor="dispatch-weight" className="block text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-1.5">Weight (lbs)</label>
                   <input
-                    value={weight} onChange={e => setWeight(e.target.value)}
+                    id="dispatch-weight"
+                    value={weight}
+                    onChange={e => dispatch({ type: "SET_FIELD", field: "weight", value: e.target.value })}
                     className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-100 transition-colors"
                     placeholder="40,000"
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-1.5">
+                  <label htmlFor="dispatch-pickup" className="block text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-1.5">
                     <Calendar className="w-3 h-3 inline mr-1" />Pickup Date/Time
                   </label>
                   <input
-                    type="datetime-local" value={pickup} onChange={e => setPickup(e.target.value)}
+                    id="dispatch-pickup"
+                    type="datetime-local"
+                    value={pickup}
+                    onChange={e => dispatch({ type: "SET_FIELD", field: "pickup", value: e.target.value })}
                     className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-100 transition-colors"
                   />
                 </div>
               </div>
 
               {/* Driver selection */}
-              <div>
-                <label className="block text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-2">
+              <div role="group" aria-label="Assign Driver">
+                <p className="block text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-2">
                   <User className="w-3 h-3 inline mr-1" />Assign Driver (optional)
-                </label>
+                </p>
                 <div className="space-y-1.5">
                   {AVAILABLE_DRIVERS.map(d => (
-                    <div
+                    <button
                       key={d.id}
-                      onClick={() => setSelectedDriver(selectedDriver === d.id ? null : d.id)}
+                      type="button"
+                      onClick={() => dispatch({ type: "SELECT_DRIVER", id: selectedDriver === d.id ? null : d.id })}
                       className={cn(
-                        "flex items-center gap-3 p-2.5 rounded-xl border cursor-pointer transition-all",
+                        "w-full flex items-center gap-3 p-2.5 rounded-xl border transition-all text-left",
                         selectedDriver === d.id
                           ? "border-amber-400 bg-amber-50"
                           : "border-gray-100 hover:border-gray-200 hover:bg-gray-50"
@@ -205,7 +253,7 @@ export function DispatchLoadModal({ open, onClose }: Props) {
                       <div className="w-3 h-3 rounded-full border-2 border-gray-300 shrink-0 flex items-center justify-center">
                         {selectedDriver === d.id && <div className="w-1.5 h-1.5 rounded-full bg-amber-500" />}
                       </div>
-                    </div>
+                    </button>
                   ))}
                 </div>
               </div>
