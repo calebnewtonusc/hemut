@@ -16,6 +16,8 @@ body {
   box-sizing: border-box;
 }
 
+/* ─── Scrollbar ─────────────────────────────────────────────────────────────── */
+
 .scrollbar-thin::-webkit-scrollbar {
   width: 4px;
 }
@@ -28,4 +30,175 @@ body {
 }
 .scrollbar-thin::-webkit-scrollbar-thumb:hover {
   background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Global thin scrollbar for main content */
+main::-webkit-scrollbar {
+  width: 4px;
+}
+main::-webkit-scrollbar-track {
+  background: transparent;
+}
+main::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.08);
+  border-radius: 2px;
+}
+main::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+/* ─── Animations ────────────────────────────────────────────────────────────── */
+
+/* Slide in from right (drawers) */
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.animate-slide-in-right {
+  animation: slideInRight 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Slide up (modals, bulk action bars) */
+@keyframes slideUp {
+  from {
+    transform: translateY(12px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-slide-up {
+  animation: slideUp 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Fade in */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
+/* Skeleton shimmer */
+@keyframes shimmer {
+  0%   { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+
+.animate-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.04) 25%,
+    rgba(255, 255, 255, 0.08) 37%,
+    rgba(255, 255, 255, 0.04) 63%
+  );
+  background-size: 800px 100%;
+  animation: shimmer 1.6s infinite linear;
+}
+
+/* Override default pulse for skeleton use */
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.45; }
+}
+
+/* Badge pulse (one time) */
+@keyframes pulseBadge {
+  0%   { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4); }
+  70%  { box-shadow: 0 0 0 6px rgba(245, 158, 11, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
+}
+
+.animate-pulse-once {
+  animation: pulseBadge 1s ease-out 0.5s 1;
+}
+
+/* Scale in (for new item appearing) */
+@keyframes scaleIn {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.18s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* ─── Sidebar transition ─────────────────────────────────────────────────────── */
+
+aside {
+  will-change: width;
+}
+
+/* ─── Focus ring ─────────────────────────────────────────────────────────────── */
+
+:focus-visible {
+  outline: 2px solid rgba(245, 158, 11, 0.5);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+/* ─── Mobile responsive overrides ───────────────────────────────────────────── */
+
+@media (max-width: 768px) {
+  /* Sidebar: auto-collapse to icon-only on small screens */
+  aside {
+    width: 68px !important;
+  }
+
+  aside .collapse-label {
+    display: none;
+  }
+
+  /* Communications: stack channel sidebar on top */
+  .comm-layout {
+    flex-direction: column;
+  }
+
+  .comm-channel-sidebar {
+    width: 100%;
+    flex-direction: row;
+    overflow-x: auto;
+    padding-bottom: 8px;
+  }
+
+  /* Full-width drawers on mobile */
+  .drawer-panel {
+    width: 100vw !important;
+  }
+}
+
+/* ─── Typography utilities ───────────────────────────────────────────────────── */
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ─── Transition utilities ───────────────────────────────────────────────────── */
+
+.transition-width {
+  transition-property: width;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 300ms;
 }

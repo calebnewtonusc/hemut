@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useReducer } from "react";
 import {
   MessageSquare,
   Bell,
@@ -16,6 +16,9 @@ import {
   Send,
   ArrowRight,
   Sparkles,
+  Inbox,
+  Star,
+  Check,
 } from "lucide-react";
 
 // ─── AI Reply Suggestions ─────────────────────────────────────────────────────
@@ -49,6 +52,7 @@ function generateAIReply(messageId: string): string {
 
 type Channel = "dispatch" | "driver" | "compliance" | "customer" | "team";
 type InboxChannel = Channel | "all";
+type InboxFilter = "all" | "unread" | "important";
 
 interface Message {
   id: string;
@@ -62,6 +66,7 @@ interface Message {
   unread: boolean;
   priority?: "critical" | "high" | "normal";
   load?: string;
+  starred?: boolean;
 }
 
 // ─── Channel Config ───────────────────────────────────────────────────────────
@@ -80,42 +85,42 @@ const channelConfig: Record<
   compliance: {
     label: "Compliance",
     icon: Shield,
-    pillBg: "bg-white/[0.07]",
-    pillText: "text-white/45",
-    avatarBg: "bg-white/[0.08]",
-    avatarText: "text-white/50",
+    pillBg: "bg-red-500/10",
+    pillText: "text-red-400",
+    avatarBg: "bg-red-500/10",
+    avatarText: "text-red-400",
   },
   dispatch: {
     label: "Dispatch",
     icon: Radio,
-    pillBg: "bg-white/[0.07]",
-    pillText: "text-white/45",
-    avatarBg: "bg-white/[0.08]",
-    avatarText: "text-white/50",
+    pillBg: "bg-amber-500/10",
+    pillText: "text-amber-400",
+    avatarBg: "bg-amber-500/10",
+    avatarText: "text-amber-400",
   },
   driver: {
     label: "Driver",
     icon: Truck,
-    pillBg: "bg-white/[0.07]",
-    pillText: "text-white/45",
-    avatarBg: "bg-white/[0.08]",
-    avatarText: "text-white/50",
+    pillBg: "bg-sky-500/10",
+    pillText: "text-sky-400",
+    avatarBg: "bg-sky-500/10",
+    avatarText: "text-sky-400",
   },
   customer: {
     label: "Customer",
     icon: FileText,
-    pillBg: "bg-white/[0.07]",
-    pillText: "text-white/45",
-    avatarBg: "bg-white/[0.08]",
-    avatarText: "text-white/50",
+    pillBg: "bg-violet-500/10",
+    pillText: "text-violet-400",
+    avatarBg: "bg-violet-500/10",
+    avatarText: "text-violet-400",
   },
   team: {
     label: "Team",
     icon: Users,
-    pillBg: "bg-white/[0.07]",
-    pillText: "text-white/45",
-    avatarBg: "bg-white/[0.08]",
-    avatarText: "text-white/50",
+    pillBg: "bg-emerald-500/10",
+    pillText: "text-emerald-400",
+    avatarBg: "bg-emerald-500/10",
+    avatarText: "text-emerald-400",
   },
 };
 
@@ -136,6 +141,7 @@ const messages: Message[] = [
     unread: true,
     priority: "critical",
     load: "L-8815",
+    starred: true,
   },
   {
     id: "2",
@@ -151,6 +157,7 @@ const messages: Message[] = [
     unread: true,
     priority: "high",
     load: "L-8816",
+    starred: true,
   },
   {
     id: "3",
@@ -238,6 +245,26 @@ const messages: Message[] = [
   },
 ];
 
+// ─── Status Badge ─────────────────────────────────────────────────────────────
+
+type StatusType = "pending" | "in-progress" | "complete" | "overdue" | "critical";
+
+function StatusBadge({ status }: { status: StatusType }) {
+  const map: Record<StatusType, { label: string; cls: string }> = {
+    "pending":     { label: "Pending",     cls: "bg-white/[0.07] text-white/45 border-white/[0.1]" },
+    "in-progress": { label: "In Progress", cls: "bg-sky-500/15 text-sky-400 border-sky-500/20" },
+    "complete":    { label: "Complete",    cls: "bg-emerald-500/15 text-emerald-400 border-emerald-500/20" },
+    "overdue":     { label: "Overdue",     cls: "bg-red-500/15 text-red-400 border-red-500/20" },
+    "critical":    { label: "Critical",    cls: "bg-red-500/20 text-red-300 border-red-500/30" },
+  };
+  const { label, cls } = map[status];
+  return (
+    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide border ${cls}`}>
+      {label}
+    </span>
+  );
+}
+
 // ─── Compose Modal ─────────────────────────────────────────────────────────────
 
 function ComposeModal({ onClose }: { onClose: () => void }) {
@@ -262,7 +289,7 @@ function ComposeModal({ onClose }: { onClose: () => void }) {
         onClick={onClose}
         onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onClose(); }}
       />
-      <div className="relative z-10 w-full max-w-md mx-4 bg-[#0a1020] border border-white/[0.1] rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.6)]">
+      <div className="relative z-10 w-full max-w-md mx-4 bg-[#0a1020] border border-white/[0.1] rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.6)] animate-slide-up">
         <div className="flex items-center justify-between px-6 pt-6 pb-5 border-b border-white/[0.06]">
           <h2 className="text-[17px] font-bold text-white">New Message</h2>
           <button
@@ -373,7 +400,6 @@ function ReplyDrawer({
   const [aiGenerating, setAiGenerating] = useState(false);
   const ch = channelConfig[message.channel];
 
-  // Mark as read when drawer opens
   useEffect(() => { onRead(message.id); }, [message.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function handleSend() {
@@ -401,7 +427,6 @@ function ReplyDrawer({
       const data = await res.json();
       if (data.text) setReply(data.text);
     } catch {
-      // fallback to pre-written content if API unavailable
       setReply(generateAIReply(message.id));
     } finally {
       setAiGenerating(false);
@@ -447,9 +472,19 @@ function ReplyDrawer({
               <ch.icon className="w-2.5 h-2.5" />
               {ch.label}
             </span>
+            {message.priority === "critical" && (
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-500/15 text-red-400 border border-red-500/20 uppercase tracking-wide">
+                Critical
+              </span>
+            )}
+            {message.priority === "high" && (
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-400 border border-amber-500/20 uppercase tracking-wide">
+                High
+              </span>
+            )}
             <span className="text-[11px] text-white/25 ml-auto">{message.time}</span>
           </div>
-          <p className="text-[13px] text-white/55 leading-relaxed max-h-32 overflow-y-auto whitespace-pre-line">
+          <p className="text-[13px] text-white/55 leading-relaxed max-h-36 overflow-y-auto whitespace-pre-line scrollbar-thin">
             {message.fullBody}
           </p>
         </div>
@@ -528,18 +563,268 @@ function ReplyDrawer({
   );
 }
 
+// ─── Empty State ──────────────────────────────────────────────────────────────
+
+function EmptyState({ filter }: { filter: InboxFilter }) {
+  const config = {
+    all:       { icon: Inbox,   title: "No messages",       sub: "Your inbox is empty — nothing here yet." },
+    unread:    { icon: Bell,    title: "All caught up",      sub: "No unread messages. Great job staying on top of things." },
+    important: { icon: Star,    title: "No starred messages", sub: "Star messages to find them here quickly." },
+  };
+  const { icon: Icon, title, sub } = config[filter];
+  return (
+    <div className="flex flex-col items-center justify-center py-24 text-center gap-4">
+      <div className="w-14 h-14 rounded-2xl bg-white/[0.04] border border-white/[0.06] flex items-center justify-center">
+        <Icon className="w-6 h-6 text-white/20" />
+      </div>
+      <div>
+        <p className="text-[15px] font-semibold text-white/40">{title}</p>
+        <p className="text-[13px] text-white/25 mt-1.5 max-w-xs">{sub}</p>
+      </div>
+    </div>
+  );
+}
+
+// ─── Bulk Action Bar ──────────────────────────────────────────────────────────
+
+function BulkActionBar({
+  selectedCount,
+  onMarkRead,
+  onClear,
+}: {
+  selectedCount: number;
+  onMarkRead: () => void;
+  onClear: () => void;
+}) {
+  if (selectedCount === 0) return null;
+  return (
+    <div className="flex items-center gap-3 px-4 py-2.5 bg-amber-500/10 border border-amber-500/20 rounded-xl mb-4 animate-slide-up">
+      <span className="text-[12px] font-semibold text-amber-400">
+        {selectedCount} selected
+      </span>
+      <div className="flex-1" />
+      <button
+        onClick={onMarkRead}
+        className="flex items-center gap-1.5 text-[12px] font-medium text-white/65 hover:text-white/90 bg-white/[0.06] hover:bg-white/[0.1] px-3 py-1.5 rounded-lg transition-colors"
+      >
+        <Check className="w-3 h-3" />
+        Mark Read
+      </button>
+      <button
+        onClick={onClear}
+        className="flex items-center gap-1.5 text-[12px] font-medium text-white/65 hover:text-white/90 bg-white/[0.06] hover:bg-white/[0.1] px-3 py-1.5 rounded-lg transition-colors"
+      >
+        <X className="w-3 h-3" />
+        Clear
+      </button>
+    </div>
+  );
+}
+
+// ─── Message Card ─────────────────────────────────────────────────────────────
+
+function MessageCard({
+  msg,
+  isUnread,
+  isSelected,
+  onSelect,
+  onOpen,
+  onStar,
+}: {
+  msg: Message;
+  isUnread: boolean;
+  isSelected: boolean;
+  onSelect: (id: string) => void;
+  onOpen: (msg: Message) => void;
+  onStar: (id: string) => void;
+}) {
+  const ch = channelConfig[msg.channel];
+
+  return (
+    <div
+      className={`group relative border-b border-white/[0.05] transition-colors ${
+        isSelected ? "bg-amber-500/[0.05]" : "hover:bg-white/[0.025]"
+      } ${
+        msg.priority === "critical"
+          ? "pl-3 border-l-2 border-l-red-500/70"
+          : msg.priority === "high"
+          ? "pl-3 border-l-2 border-l-amber-500/50"
+          : "pl-0"
+      }`}
+    >
+      <div className="flex items-start gap-3 py-4 pr-4">
+        {/* Checkbox */}
+        <button
+          onClick={() => onSelect(msg.id)}
+          className={`mt-0.5 shrink-0 w-4 h-4 rounded border transition-all ${
+            isSelected
+              ? "bg-amber-500 border-amber-500"
+              : "border-white/[0.15] bg-transparent hover:border-white/30"
+          } flex items-center justify-center`}
+          aria-label="Select message"
+        >
+          {isSelected && <Check className="w-2.5 h-2.5 text-[#080d1a]" />}
+        </button>
+
+        {/* Star */}
+        <button
+          onClick={() => onStar(msg.id)}
+          className="mt-0.5 shrink-0"
+          aria-label="Star message"
+        >
+          <Star
+            className={`w-3.5 h-3.5 transition-colors ${
+              msg.starred ? "text-amber-400 fill-amber-400" : "text-white/15 hover:text-white/35"
+            }`}
+          />
+        </button>
+
+        {/* Content */}
+        <div
+          role="button"
+          tabIndex={0}
+          className="flex-1 min-w-0 cursor-pointer"
+          onClick={() => onOpen(msg)}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onOpen(msg); }}
+        >
+          {/* Top row */}
+          <div className="flex items-start justify-between mb-1.5">
+            <div className="flex items-center gap-2 flex-wrap">
+              {msg.priority === "critical" && (
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-500/15 text-red-400 border border-red-500/20 uppercase tracking-wide">
+                  Critical
+                </span>
+              )}
+              {msg.priority === "high" && (
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-400 border border-amber-500/20 uppercase tracking-wide">
+                  High
+                </span>
+              )}
+              <span className={`text-[14px] font-semibold ${isUnread ? "text-white" : "text-white/65"}`}>
+                {msg.from}
+              </span>
+            </div>
+            <span className="text-[11px] text-white/30 shrink-0 mt-0.5 ml-3">{msg.time}</span>
+          </div>
+
+          {/* Subject */}
+          <p className={`text-[13px] font-semibold mb-1.5 leading-snug ${isUnread ? "text-white/90" : "text-white/55"}`}>
+            {msg.subject}
+          </p>
+
+          {/* Preview */}
+          <p className="text-[12px] text-white/38 leading-relaxed line-clamp-1 mb-3">
+            {msg.preview}
+          </p>
+
+          {/* Footer */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className={`flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-full ${ch.pillBg} ${ch.pillText}`}>
+                <ch.icon className="w-2.5 h-2.5" />
+                {ch.label}
+              </span>
+              {msg.load && (
+                <span className="text-[10px] font-mono font-bold text-white/30 bg-white/[0.06] border border-white/[0.06] px-2 py-0.5 rounded-md">
+                  {msg.load}
+                </span>
+              )}
+              {isUnread && (
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0" />
+              )}
+            </div>
+            <span className="flex items-center gap-1.5 text-[12px] font-medium text-white/25 group-hover:text-white/50 transition-colors">
+              Reply <ArrowRight className="w-3 h-3" />
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── State & Reducer for CommunicationsClient ─────────────────────────────────
+
+interface CommsState {
+  activeChannel: InboxChannel;
+  inboxFilter: InboxFilter;
+  replyTarget: Message | null;
+  composeOpen: boolean;
+  readIds: Set<string>;
+  starredIds: Set<string>;
+  selectedIds: Set<string>;
+}
+
+type CommsAction =
+  | { type: "SET_CHANNEL"; channel: InboxChannel }
+  | { type: "SET_FILTER"; filter: InboxFilter }
+  | { type: "SET_REPLY_TARGET"; message: Message | null }
+  | { type: "SET_COMPOSE_OPEN"; open: boolean }
+  | { type: "MARK_READ"; id: string }
+  | { type: "TOGGLE_STAR"; id: string }
+  | { type: "TOGGLE_SELECT"; id: string }
+  | { type: "MARK_SELECTED_READ"; ids: Set<string> }
+  | { type: "CLEAR_SELECTED" };
+
+function commsReducer(state: CommsState, action: CommsAction): CommsState {
+  switch (action.type) {
+    case "SET_CHANNEL":
+      return { ...state, activeChannel: action.channel };
+    case "SET_FILTER":
+      return { ...state, inboxFilter: action.filter, selectedIds: new Set() };
+    case "SET_REPLY_TARGET":
+      return { ...state, replyTarget: action.message };
+    case "SET_COMPOSE_OPEN":
+      return { ...state, composeOpen: action.open };
+    case "MARK_READ":
+      if (state.readIds.has(action.id)) return state;
+      return { ...state, readIds: new Set([...state.readIds, action.id]) };
+    case "TOGGLE_STAR": {
+      const next = new Set(state.starredIds);
+      if (next.has(action.id)) next.delete(action.id); else next.add(action.id);
+      return { ...state, starredIds: next };
+    }
+    case "TOGGLE_SELECT": {
+      const next = new Set(state.selectedIds);
+      if (next.has(action.id)) next.delete(action.id); else next.add(action.id);
+      return { ...state, selectedIds: next };
+    }
+    case "MARK_SELECTED_READ":
+      return {
+        ...state,
+        readIds: new Set([...state.readIds, ...action.ids]),
+        selectedIds: new Set(),
+      };
+    case "CLEAR_SELECTED":
+      return { ...state, selectedIds: new Set() };
+    default:
+      return state;
+  }
+}
+
+const COMMS_INITIAL_STATE: CommsState = {
+  activeChannel: "all",
+  inboxFilter: "all",
+  replyTarget: null,
+  composeOpen: false,
+  readIds: new Set(),
+  starredIds: new Set(messages.filter((m) => m.starred).map((m) => m.id)),
+  selectedIds: new Set(),
+};
+
 // ─── Main Component ────────────────────────────────────────────────────────────
 
 export function CommunicationsClient() {
-  const [activeChannel, setActiveChannel] = useState<InboxChannel>("all");
-  const [replyTarget, setReplyTarget] = useState<Message | null>(null);
-  const [composeOpen, setComposeOpen] = useState(false);
-  const [readIds, setReadIds] = useState<Set<string>>(new Set());
+  const [state, dispatch] = useReducer(commsReducer, COMMS_INITIAL_STATE);
+  const { activeChannel, inboxFilter, replyTarget, composeOpen, readIds, starredIds, selectedIds } = state;
 
-  const markRead = (id: string) =>
-    setReadIds((prev) => (prev.has(id) ? prev : new Set([...prev, id])));
+  const markRead = (id: string) => dispatch({ type: "MARK_READ", id });
+  const toggleStar = (id: string) => dispatch({ type: "TOGGLE_STAR", id });
+  const toggleSelect = (id: string) => dispatch({ type: "TOGGLE_SELECT", id });
+  const markSelectedRead = () => dispatch({ type: "MARK_SELECTED_READ", ids: selectedIds });
 
   const isUnread = (m: Message) => m.unread && !readIds.has(m.id);
+  const isStarred = (m: Message) => starredIds.has(m.id);
   const totalUnread = messages.filter(isUnread).length;
 
   const channelOrder: Channel[] = ["dispatch", "compliance", "driver", "customer", "team"];
@@ -547,10 +832,18 @@ export function CommunicationsClient() {
   const unreadByChannel = (ch: Channel) =>
     messages.filter((m) => m.channel === ch && isUnread(m)).length;
 
-  const filtered =
+  // Apply channel filter
+  const byChannel =
     activeChannel === "all"
       ? messages
       : messages.filter((m) => m.channel === activeChannel);
+
+  // Apply inbox filter (All / Unread / Important)
+  const filtered = byChannel.filter((m) => {
+    if (inboxFilter === "unread") return isUnread(m);
+    if (inboxFilter === "important") return isStarred(m);
+    return true;
+  });
 
   const kpis = [
     {
@@ -591,8 +884,14 @@ export function CommunicationsClient() {
     },
   ];
 
+  const filterTabs: { key: InboxFilter; label: string; count?: number }[] = [
+    { key: "all",       label: "All",       count: messages.length },
+    { key: "unread",    label: "Unread",    count: totalUnread },
+    { key: "important", label: "Important", count: starredIds.size },
+  ];
+
   return (
-    <div className="flex flex-col h-full px-10">
+    <div className="flex flex-col h-full px-6 lg:px-10">
       {/* Page header */}
       <div className="flex items-start justify-between pt-8 pb-6 mb-8 border-b border-white/[0.06] shrink-0">
         <div>
@@ -609,7 +908,7 @@ export function CommunicationsClient() {
             </div>
           )}
           <button
-            onClick={() => setComposeOpen(true)}
+            onClick={() => dispatch({ type: "SET_COMPOSE_OPEN", open: true })}
             className="flex items-center gap-2 bg-amber-500 hover:bg-amber-400 text-[#080d1a] font-semibold text-[13px] px-5 py-2.5 rounded-xl transition-colors"
           >
             <Plus className="w-4 h-4" />
@@ -619,13 +918,15 @@ export function CommunicationsClient() {
       </div>
 
       {/* KPI strip */}
-      <div className="grid grid-cols-4 gap-6 mb-8 pb-6 border-b border-white/[0.05] shrink-0">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-8 pb-6 border-b border-white/[0.05] shrink-0">
         {kpis.map((k) => {
           const Icon = k.icon;
           return (
             <div key={k.label} className="flex flex-col gap-1">
               <div className="flex items-center gap-1.5 mb-1">
-                <Icon className="w-3.5 h-3.5 text-white/20 shrink-0" />
+                <div className={`w-6 h-6 rounded-lg ${k.iconBg} border ${k.iconBorder} flex items-center justify-center shrink-0`}>
+                  <Icon className={`w-3 h-3 ${k.iconColor}`} />
+                </div>
                 <p className="text-[11px] text-white/35 font-medium">{k.label}</p>
               </div>
               <p className="text-[26px] font-bold tracking-tight text-white leading-none">{k.value}</p>
@@ -639,24 +940,24 @@ export function CommunicationsClient() {
       <div className="flex gap-7 flex-1 min-h-0 pb-10 overflow-hidden">
 
         {/* Channel sidebar */}
-        <div className="w-52 shrink-0 overflow-y-auto">
+        <div className="w-48 shrink-0 overflow-y-auto">
           <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-white/25 mb-5 px-2">
             Channels
           </p>
-          <div className="space-y-1.5">
+          <div className="space-y-1">
             <button
-              onClick={() => setActiveChannel("all")}
-              className={`w-full flex items-center justify-between px-4 py-3.5 rounded-xl text-[13px] font-medium transition-all ${
+              onClick={() => dispatch({ type: "SET_CHANNEL", channel: "all" })}
+              className={`w-full flex items-center justify-between px-3.5 py-3 rounded-xl text-[13px] font-medium transition-all ${
                 activeChannel === "all"
                   ? "bg-amber-500/10 text-amber-400 border border-amber-500/20"
                   : "text-white/45 hover:bg-white/[0.04] hover:text-white/75 border border-transparent"
               }`}
             >
-              <span className="flex items-center gap-3">
+              <span className="flex items-center gap-2.5">
                 <MessageSquare className="w-[14px] h-[14px] shrink-0" />
                 All
               </span>
-              <span className="text-[10px] bg-white/[0.07] rounded-full px-2 py-0.5 text-white/40">
+              <span className="text-[10px] bg-white/[0.07] rounded-full px-1.5 py-0.5 text-white/40 min-w-[20px] text-center">
                 {messages.length}
               </span>
             </button>
@@ -670,20 +971,24 @@ export function CommunicationsClient() {
               return (
                 <button
                   key={key}
-                  onClick={() => setActiveChannel(key)}
-                  className={`w-full flex items-center justify-between px-4 py-3.5 rounded-xl text-[13px] font-medium transition-all ${
+                  onClick={() => dispatch({ type: "SET_CHANNEL", channel: key })}
+                  className={`w-full flex items-center justify-between px-3.5 py-3 rounded-xl text-[13px] font-medium transition-all ${
                     active
                       ? "bg-amber-500/10 text-amber-400 border border-amber-500/20"
                       : "text-white/45 hover:bg-white/[0.04] hover:text-white/75 border border-transparent"
                   }`}
                 >
-                  <span className="flex items-center gap-3 min-w-0">
+                  <span className="flex items-center gap-2.5 min-w-0">
                     <Icon className="w-[14px] h-[14px] shrink-0" />
                     <span className="truncate">{cfg.label}</span>
                   </span>
-                  <div className="flex items-center gap-2 shrink-0 ml-1">
-                    {unread > 0 && <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />}
-                    <span className="text-[10px] bg-white/[0.07] rounded-full px-2 py-0.5 text-white/40">
+                  <div className="flex items-center gap-1.5 shrink-0 ml-1">
+                    {unread > 0 && (
+                      <span className="w-4 h-4 rounded-full bg-amber-500 flex items-center justify-center text-[9px] font-bold text-[#080d1a]">
+                        {unread}
+                      </span>
+                    )}
+                    <span className="text-[10px] bg-white/[0.07] rounded-full px-1.5 py-0.5 text-white/40 min-w-[20px] text-center">
                       {count}
                     </span>
                   </div>
@@ -694,88 +999,67 @@ export function CommunicationsClient() {
         </div>
 
         {/* Message list */}
-        <div className="flex-1 overflow-y-auto space-y-3 min-w-0 pr-2">
-          {filtered.map((msg) => {
-            const ch = channelConfig[msg.channel];
-            const unread = isUnread(msg);
-            return (
-              <div
-                key={msg.id}
-                role="button"
-                tabIndex={0}
-                onClick={() => setReplyTarget(msg)}
-                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setReplyTarget(msg); }}
-                className={`border-b border-white/[0.05] py-4 cursor-pointer transition-colors hover:bg-white/[0.025] ${
-                  msg.priority === "critical" ? "pl-3 border-l-2 border-l-red-500/70 -ml-0" : msg.priority === "high" ? "pl-3 border-l-2 border-l-amber-500/50 -ml-0" : "pl-0"
+        <div className="flex-1 overflow-y-auto min-w-0 pr-1">
+          {/* Filter tabs: All / Unread / Important */}
+          <div className="flex items-center gap-1 bg-white/[0.04] border border-white/[0.06] rounded-xl p-1 w-fit mb-4">
+            {filterTabs.map((tab) => (
+              <button
+                key={tab.key}
+                onClick={() => dispatch({ type: "SET_FILTER", filter: tab.key })}
+                className={`flex items-center gap-1.5 text-[12px] font-medium px-3.5 py-1.5 rounded-lg transition-all ${
+                  inboxFilter === tab.key
+                    ? "bg-white/[0.09] text-white font-semibold"
+                    : "text-white/40 hover:text-white/65"
                 }`}
               >
-                {/* Top row: priority + sender + time */}
-                <div className="flex items-start justify-between mb-2">
-                  <div className="flex items-center gap-2">
-                    {msg.priority === "critical" && (
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-500/15 text-red-400 border border-red-500/20 uppercase tracking-wide">
-                        Critical
-                      </span>
-                    )}
-                    {msg.priority === "high" && (
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-400 border border-amber-500/20 uppercase tracking-wide">
-                        High
-                      </span>
-                    )}
-                    <span className={`text-[14px] font-semibold ${unread ? "text-white" : "text-white/70"}`}>
-                      {msg.from}
-                    </span>
-                  </div>
-                  <span className="text-[11px] text-white/30 shrink-0 mt-0.5">{msg.time}</span>
-                </div>
-
-                {/* Subject */}
-                <p className={`text-[13px] font-semibold mb-1.5 leading-snug ${unread ? "text-white/90" : "text-white/60"}`}>
-                  {msg.subject}
-                </p>
-
-                {/* Preview */}
-                <p className="text-[12px] text-white/40 leading-relaxed line-clamp-1 mb-3">
-                  {msg.preview}
-                </p>
-
-                {/* Footer */}
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2.5">
-                    <span className={`flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-full ${ch.pillBg} ${ch.pillText}`}>
-                      <ch.icon className="w-2.5 h-2.5" />
-                      {ch.label}
-                    </span>
-                    {msg.load && (
-                      <span className="text-[10px] font-mono font-bold text-white/30 bg-white/[0.06] border border-white/[0.06] px-2 py-0.5 rounded-md">
-                        {msg.load}
-                      </span>
-                    )}
-                    {unread && (
-                      <span className="flex items-center gap-1.5 text-[11px] font-semibold text-amber-400">
-                        <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-                        Unread
-                      </span>
-                    )}
-                  </div>
-                  <span className="flex items-center gap-1.5 text-[12px] font-medium text-white/30 hover:text-white/60 transition-colors">
-                    Reply <ArrowRight className="w-3.5 h-3.5" />
+                {tab.label}
+                {tab.count !== undefined && tab.count > 0 && (
+                  <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center ${
+                    inboxFilter === tab.key ? "bg-white/10 text-white/80" : "bg-white/[0.06] text-white/35"
+                  }`}>
+                    {tab.count}
                   </span>
-                </div>
-              </div>
-            );
-          })}
+                )}
+              </button>
+            ))}
+          </div>
+
+          {/* Bulk action bar */}
+          <BulkActionBar
+            selectedCount={selectedIds.size}
+            onMarkRead={markSelectedRead}
+            onClear={() => dispatch({ type: "CLEAR_SELECTED" })}
+          />
+
+          {/* Message list */}
+          {filtered.length === 0 ? (
+            <EmptyState filter={inboxFilter} />
+          ) : (
+            <div>
+              {filtered.map((msg) => (
+                <MessageCard
+                  key={msg.id}
+                  msg={{ ...msg, starred: starredIds.has(msg.id) }}
+                  isUnread={isUnread(msg)}
+                  isSelected={selectedIds.has(msg.id)}
+                  onSelect={toggleSelect}
+                  onOpen={(msg) => dispatch({ type: "SET_REPLY_TARGET", message: msg })}
+                  onStar={toggleStar}
+                />
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
       {replyTarget && (
         <ReplyDrawer
           message={replyTarget}
-          onClose={() => setReplyTarget(null)}
+          onClose={() => dispatch({ type: "SET_REPLY_TARGET", message: null })}
           onRead={markRead}
         />
       )}
-      {composeOpen && <ComposeModal onClose={() => setComposeOpen(false)} />}
+      {composeOpen && <ComposeModal onClose={() => dispatch({ type: "SET_COMPOSE_OPEN", open: false })} />}
     </div>
   );
 }
