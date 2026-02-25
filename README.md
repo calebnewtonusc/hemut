@@ -1,4 +1,4 @@
-# Hemut — AI Logistics OS
+# Hemut: AI Logistics OS
 
 ![Next.js](https://img.shields.io/badge/Next.js_16-black?style=flat-square&logo=next.js)
 ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&logo=typescript&logoColor=white)
@@ -7,7 +7,7 @@
 ![NextAuth](https://img.shields.io/badge/NextAuth.js-black?style=flat-square&logo=next.js)
 ![Vercel](https://img.shields.io/badge/Vercel-000000?style=flat-square&logo=vercel)
 
-Internal operations dashboard for Hemut — an AI operating system for trucking and logistics. Built for Avenues Tech Consulting Spring 2026.
+Internal operations dashboard for Hemut, an AI operating system for trucking and logistics. Built for Avenues Tech Consulting Spring 2026.
 
 **Live:** https://hemut-wheat.vercel.app
 
@@ -15,12 +15,12 @@ Internal operations dashboard for Hemut — an AI operating system for trucking 
 
 ## Features
 
-- **Unified Communications Hub** — Multi-channel inbox aggregating dispatch alerts, driver check-ins, compliance events, customer messages, and team communications in one view
-- **Load & Dispatch Board** — Real-time tracking of active loads with driver assignments, route progress, ETA, and revenue-per-mile metrics
-- **Driver Management** — CDL driver profiles with HOS (hours-of-service) tracking, CSA safety scores, status, and location data
-- **New Hire Onboarding** — Role-based onboarding tracks with compliance checklists, progress indicators, and document management
-- **Newsletter System** — AI-assisted draft generation with blueprint templates for driver and customer communications
-- **Fleet & Compliance** — Centralized alert management for regulatory events with severity tracking and resolution workflows
+- **Unified Communications Hub:** Multi-channel inbox aggregating dispatch alerts, driver check-ins, compliance events, customer messages, and team communications in one view
+- **Load & Dispatch Board:** Real-time tracking of active loads with driver assignments, route progress, ETA, and revenue-per-mile metrics
+- **Driver Management:** CDL driver profiles with HOS (hours-of-service) tracking, CSA safety scores, status, and location data
+- **New Hire Onboarding:** Role-based onboarding tracks with compliance checklists, progress indicators, and document management
+- **Newsletter System:** AI-assisted draft generation with blueprint templates for driver and customer communications
+- **Fleet & Compliance:** Centralized alert management for regulatory events with severity tracking and resolution workflows
 
 ## Tech Stack
 
@@ -49,7 +49,7 @@ Seed demo data:
 npx prisma db seed
 ```
 
-Open [http://localhost:3000](http://localhost:3000) — the app redirects to `/communications` by default.
+Open [http://localhost:3000](http://localhost:3000). The app redirects to `/communications` by default.
 
 ### Environment Variables
 
@@ -76,5 +76,5 @@ prisma/
 
 ## Author
 
-**Caleb Newton** — [calebnewton.me](https://calebnewton.me)
-Built for Avenues Tech Consulting · Spring 2026
+**Caleb Newton** at [calebnewton.me](https://calebnewton.me)
+Built for Avenues Tech Consulting, Spring 2026
