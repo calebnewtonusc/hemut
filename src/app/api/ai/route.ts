@@ -1,13 +1,12 @@
 import { NextResponse } from "next/server";
+import Anthropic from "@anthropic-ai/sdk";
 
-const OLLAMA_API_KEY = process.env.OLLAMA_API_KEY;
-const OLLAMA_HOST = "https://ollama.com";
-const MODEL = process.env.OLLAMA_MODEL ?? "llama3.2";
+const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
 export async function POST(request: Request) {
-  if (!OLLAMA_API_KEY) {
+  if (!process.env.ANTHROPIC_API_KEY) {
     return NextResponse.json(
-      { error: "OLLAMA_API_KEY not configured" },
+      { error: "ANTHROPIC_API_KEY not configured" },
       { status: 500 }
     );
   }
@@ -52,31 +51,20 @@ Use realistic trucking data (RPM, loads, HOS, compliance, etc.) consistent with 
     return NextResponse.json({ error: "Invalid type" }, { status: 400 });
   }
 
-  const res = await fetch(`${OLLAMA_HOST}/api/chat`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${OLLAMA_API_KEY}`,
-    },
-    body: JSON.stringify({
-      model: MODEL,
-      messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: userPrompt },
-      ],
-      stream: false,
-    }),
-  });
+  try {
+    const message = await anthropic.messages.create({
+      model: "claude-sonnet-4-6",
+      max_tokens: 512,
+      system: systemPrompt,
+      messages: [{ role: "user", content: userPrompt }],
+    });
 
-  if (!res.ok) {
-    const text = await res.text();
+    const text = message.content[0].type === "text" ? message.content[0].text : "";
+    return NextResponse.json({ text });
+  } catch (err) {
     return NextResponse.json(
-      { error: `Ollama API error: ${res.status} — ${text}` },
-      { status: res.status }
+      { error: `Anthropic API error: ${String(err)}` },
+      { status: 500 }
     );
   }
-
-  const data = await res.json() as { message?: { content?: string } };
-  const text = data.message?.content ?? "";
-  return NextResponse.json({ text });
 }
