@@ -36,12 +36,14 @@ export function Sidebar() {
         <p className="px-4 pb-3.5 text-[10px] uppercase tracking-[0.14em] text-white/20 font-bold">
           Workspace
         </p>
-        {navItems.map(({ href, label, icon: Icon, badge }) => {
+        {navItems.map(({ href, label, icon: Icon, badge }, idx) => {
           const active = pathname.startsWith(href);
           return (
             <Link
               key={href}
               href={href}
+              data-aos="fade-left"
+              data-aos-delay={String(idx * 60)}
               className={cn(
                 "flex items-center gap-3 px-4 py-3.5 rounded-xl text-[13px] font-medium transition-all",
                 active

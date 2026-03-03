@@ -516,7 +516,7 @@ function ReplyDrawer({
               >
                 {aiGenerating ? (
                   <>
-                    <div className="w-3.5 h-3.5 border border-amber-400/40 border-t-amber-400 rounded-full animate-spin" />
+                    <div className="whirl-loader whirl-loader-sm" aria-hidden="true" />
                     Generating...
                   </>
                 ) : (
@@ -893,7 +893,7 @@ export function CommunicationsClient() {
   return (
     <div className="flex flex-col h-full px-6 lg:px-10">
       {/* Page header */}
-      <div className="flex items-start justify-between pt-8 pb-6 mb-8 border-b border-white/[0.06] shrink-0">
+      <div className="flex items-start justify-between pt-8 pb-6 mb-8 border-b border-white/[0.06] shrink-0" data-aos="fade-up">
         <div>
           <h1 className="text-[28px] font-bold tracking-tight text-white">Communications</h1>
           <p className="text-[14px] text-white/40 mt-2.5 leading-relaxed">
@@ -919,10 +919,10 @@ export function CommunicationsClient() {
 
       {/* KPI strip */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-8 pb-6 border-b border-white/[0.05] shrink-0">
-        {kpis.map((k) => {
+        {kpis.map((k, i) => {
           const Icon = k.icon;
           return (
-            <div key={k.label} className="flex flex-col gap-1">
+            <div key={k.label} className="flex flex-col gap-1 clay-card bg-white/[0.025] border border-white/[0.05] p-4" data-aos="fade-up" data-aos-delay={String(i * 70)}>
               <div className="flex items-center gap-1.5 mb-1">
                 <div className={`w-6 h-6 rounded-lg ${k.iconBg} border ${k.iconBorder} flex items-center justify-center shrink-0`}>
                   <Icon className={`w-3 h-3 ${k.iconColor}`} />

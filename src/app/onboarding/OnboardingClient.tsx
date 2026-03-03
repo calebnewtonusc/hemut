@@ -730,7 +730,7 @@ function KpiCard({
   valueColor?: string;
 }) {
   return (
-    <div className="flex flex-col gap-1">
+    <div className="flex flex-col gap-1 clay-card bg-white/[0.025] border border-white/[0.05] p-4" data-aos="fade-up">
       <div className="flex items-center gap-1.5 mb-1">
         <Icon className="w-3.5 h-3.5 text-white/20 shrink-0" />
         <div className="text-[11px] text-white/35 font-medium">{label}</div>
@@ -760,7 +760,8 @@ function MemberCard({ member, onViewDetails }: MemberCardProps) {
       tabIndex={0}
       onClick={onViewDetails}
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onViewDetails(); }}
-      className="bg-white/[0.025] border border-white/[0.06] rounded-2xl p-5 cursor-pointer hover:bg-white/[0.04] hover:border-white/[0.09] transition-all flex flex-col gap-3"
+      className="clay-card bg-white/[0.025] border border-white/[0.06] rounded-2xl p-5 cursor-pointer hover:bg-white/[0.04] hover:border-white/[0.09] transition-all flex flex-col gap-3"
+      data-aos="fade-up"
     >
       {/* Top: name + badges */}
       <div className="flex items-start justify-between gap-3">

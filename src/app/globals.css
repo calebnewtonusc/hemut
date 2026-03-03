@@ -202,3 +202,54 @@ aside {
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   transition-duration: 300ms;
 }
+
+/* ─── Whirl Spinner — Data loading ─────────────────────────────────────────── */
+
+@keyframes whirl-spin {
+  to { transform: rotate(360deg); }
+}
+
+.whirl-loader {
+  --whirl-color: #f59e0b;
+  --whirl-secondary: rgba(245,158,11,0.25);
+  --whirl-size: 32px;
+  --whirl-thickness: 3px;
+  display: inline-block;
+  width: var(--whirl-size);
+  height: var(--whirl-size);
+  position: relative;
+}
+
+.whirl-loader::before {
+  content: '';
+  display: block;
+  width: var(--whirl-size);
+  height: var(--whirl-size);
+  border-radius: 100%;
+  border: var(--whirl-thickness) solid var(--whirl-secondary);
+  border-top-color: var(--whirl-color);
+  animation: whirl-spin 0.7s infinite linear;
+}
+
+.whirl-loader-sm {
+  --whirl-size: 20px;
+  --whirl-thickness: 2px;
+}
+
+/* ─── Clay Card Depth ───────────────────────────────────────────────────────── */
+
+.clay-card {
+  box-shadow:
+    8px 8px 0 0 rgba(0, 0, 0, 0.15),
+    inset -2px -2px 4px rgba(0, 0, 0, 0.10),
+    inset 2px 2px 4px rgba(255, 255, 255, 0.04);
+  border-radius: 12px;
+}
+
+.clay-card-sm {
+  box-shadow:
+    4px 4px 0 0 rgba(0, 0, 0, 0.15),
+    inset -1px -1px 3px rgba(0, 0, 0, 0.10),
+    inset 1px 1px 3px rgba(255, 255, 255, 0.04);
+  border-radius: 10px;
+}
